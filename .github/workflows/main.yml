@@ -37,6 +37,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        projectPath:
+          - Reactivation
         testMode:
           - playmode
           - editmode

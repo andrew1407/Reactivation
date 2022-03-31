@@ -10,6 +10,6 @@ public class Example
     [Test]
     public void ExampleSimplePasses()
     {
-        Assert.That(true);
+        Assert.That(false);
     }
 }
