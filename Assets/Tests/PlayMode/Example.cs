@@ -10,6 +10,6 @@ public class Example
     public IEnumerator ExampleWithEnumeratorPasses()
     {
         yield return null;
-        Assert.That(true);
+        Assert.That(false);
     }
 }
