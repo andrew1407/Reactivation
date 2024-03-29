@@ -14,7 +14,7 @@ Neural network model architecture (**[here's](/NeuralNetwork/damage_modifiers.ip
 
 ![Neural network model](./Doc/Resources/Diagrams/neural-model.png)
 
-Scene objects nestingg structure ojn the main map (level):
+Scene objects nesting structure on the main map (level):
 
 ![Scene objects](./Doc/Resources/Diagrams/game-objects.png)
 
