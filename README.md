@@ -2,6 +2,10 @@
 
 [![main workflow badge](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions)
 
+<p align="center">
+  <a target="blank"><img src="./Assets/Images/Icons/icon.png" width="200" alt="Reactivation logo" /></a>
+</p>
+
 ## Description
 
 A third-person shooter made with Unity. The game collects player's metrics (during gameplay) to affect on weapon damage modifiers based on their play style, strategy (activity of usage). The project uses **Barracuda** module to load a runtime model of ONNX format to operate input/output data (gather and predict values). It is a practical part of the **[bachelor's work](https://ela.kpi.ua/items/f57022f0-be84-4b3d-aa0e-f38f550e1ee1)**.
