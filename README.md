@@ -3,7 +3,7 @@
 [![main workflow badge](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions)
 
 <p align="center">
-  <a target="blank"><img src="./Assets/Images/Icons/icon.png" width="200" alt="Reactivation logo" /></a>
+  <a target="blank"><img src="./Assets/Images/Icons/icon.png" width="140" alt="Reactivation logo" /></a>
 </p>
 
 ## Description
