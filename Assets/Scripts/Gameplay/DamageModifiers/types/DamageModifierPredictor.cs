@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Barracuda;
+using Unity.InferenceEngine;
 
 public class DamageModifierPredictor : IDamageModifier, IDisposable
 {
-    public static DamageModifierPredictor FromModel(NNModel model)
-    {
-        Model runtimeModel = ModelLoader.Load(model);
-        IWorker worker = WorkerFactory.CreateWorker(runtimeModel, WorkerFactory.Device.GPU);
-        return new DamageModifierPredictor(worker);
-    }
+    public static DamageModifierPredictor FromModel(ModelAsset model) => new(InferencePredictionWorker.FromModel(model));
 
     private readonly Dictionary<DamageType, string> _modelLabels = new() {
         {DamageType.FIST, "fist"},
@@ -30,9 +25,9 @@ public class DamageModifierPredictor : IDamageModifier, IDisposable
 
     private readonly Dictionary<DamageType, List<float>> _waveStats = new();
 
-    private readonly IWorker _worker;
+    private readonly IPredictionWorker _worker;
 
-    public DamageModifierPredictor(IWorker worker)
+    public DamageModifierPredictor(IPredictionWorker worker)
     {
         _worker = worker;
         _modifications = GameUtils.DefaultModifications();
@@ -84,19 +79,24 @@ public class DamageModifierPredictor : IDamageModifier, IDisposable
     private void setPredictedModifiactions(Dictionary<DamageType, float> inputParams)
     {
         int inputLength = _inputOrder.Length;
-        using var input = new Tensor(1, inputLength);
+        var input = new float[inputLength];
         for (int i = 0; i < inputLength; ++i) input[i] = inputParams[_inputOrder[i]];
         _worker.Execute(input);
         foreach (var label in _modelLabels)
         {
-            Tensor outputs = _worker.PeekOutput(label.Value);
-            float output = outputs.AsFloats().Max();
+            float output = _worker.PeekOutput(label.Value).Max();
             output /= 100;
             _modifications[label.Key] = GameUtils.FormatModifierValue(output);
         }
     }
 
-    private float adaptInputParam(List<float> data) => (data.Last() - GameUtils.Mean(data)) / GameUtils.Stdev(data);
+    private float adaptInputParam(List<float> data)
+    {
+        float stdev = GameUtils.Stdev(data);
+        // Unchanged share across waves has no deviation, so it is neutral instead of 0/0
+        if (stdev == 0) return 0;
+        return (data.Last() - GameUtils.Mean(data)) / stdev;
+    }
 
     private float roundPercentage(float value) => MathF.Round(value, digits: 2);
 }
