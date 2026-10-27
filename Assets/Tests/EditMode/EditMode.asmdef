@@ -7,7 +7,7 @@
         "Zenject",
         "Zenject-TestFramework",
         "Core",
-        "Unity.Barracuda"
+        "Unity.InferenceEngine"
     ],
     "includePlatforms": [
         "Editor"

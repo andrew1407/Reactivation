@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Unity.Barracuda;
 
 using DamageModifications = System.Collections.Generic.Dictionary<DamageType, float>;
 
@@ -91,11 +90,12 @@ public class DamageModifierPredictorTests
         WorkerMock workerMock = new();
         DamageModifierPredictor damageModifier = new(workerMock);
         PlayerKillsCollector killsCollector = new();
+        // Standardized against the initial 25% share; FIST stays at 25%, so it has no deviation
         Dictionary<DamageType, float> tensorValues = new() {
             {DamageType.FIST, 0},
-            {DamageType.MACHETE, 0},
-            {DamageType.ARROW, 0},
-            {DamageType.GRENADE, 0},
+            {DamageType.MACHETE, -1},
+            {DamageType.ARROW, 1},
+            {DamageType.GRENADE, -1},
         };
         Dictionary<DamageType, int> kills = new() {
             {DamageType.FIST, 5},
@@ -109,8 +109,8 @@ public class DamageModifierPredictorTests
         
         damageModifier.AnalyzeWaveStats(killsCollector);
 
-        Tensor resultTensor = workerMock.InputTensor;
-        Assert.AreEqual(tensorValues.Count, resultTensor.length, message: "Invalid tensor length");
+        float[] resultTensor = workerMock.InputValues;
+        Assert.AreEqual(tensorValues.Count, resultTensor.Length, message: "Invalid tensor length");
 
         Assert.AreEqual(tensorValues[DamageType.FIST], resultTensor[0], message: $"The result tensor value is invalid for {DamageType.FIST}");
         Assert.AreEqual(tensorValues[DamageType.MACHETE], resultTensor[1], message: $"The result tensor value is invalid for {DamageType.MACHETE}");
@@ -132,17 +132,13 @@ public class DamageModifierPredictorTests
         };
         Func<float, float> round = n => MathF.Round(n / 100, digits: 2);
 
-        workerMock.OutputTensors["fist"] = new();
-        workerMock.OutputTensors["fist"][0] = tensorOutput[DamageType.FIST];
+        workerMock.OutputTensors["fist"] = new[] { tensorOutput[DamageType.FIST] };
 
-        workerMock.OutputTensors["machete"] = new();
-        workerMock.OutputTensors["machete"][0] = tensorOutput[DamageType.MACHETE];
+        workerMock.OutputTensors["machete"] = new[] { tensorOutput[DamageType.MACHETE] };
 
-        workerMock.OutputTensors["arrow"] = new();
-        workerMock.OutputTensors["arrow"][0] = tensorOutput[DamageType.ARROW];
+        workerMock.OutputTensors["arrow"] = new[] { tensorOutput[DamageType.ARROW] };
 
-        workerMock.OutputTensors["grenade"] = new();
-        workerMock.OutputTensors["grenade"][0] = tensorOutput[DamageType.GRENADE];
+        workerMock.OutputTensors["grenade"] = new[] { tensorOutput[DamageType.GRENADE] };
 
 
         damageModifier.AnalyzeWaveStats(killsCollector);
@@ -167,47 +163,31 @@ public class DamageModifierPredictorTests
         Assert.AreEqual(expected, workerMock.DisposeCalled, message: $"Worker's method .execute() wasn't called {expected} times");
     }
 
-    private class WorkerMock : IWorker
+    private class WorkerMock : IPredictionWorker
     {
-        public float scheduleProgress { get; }
-
         public int ExecuteCalled { get; private set; }
 
         public int PeekOutputCalled { get; private set; }
 
         public int DisposeCalled { get; private set; }
 
-        public Tensor InputTensor { get; private set; }
+        public float[] InputValues { get; private set; }
 
-        public Dictionary<string, Tensor> OutputTensors = new();
-        
-        public IWorker Execute(Tensor input)
+        public Dictionary<string, float[]> OutputTensors = new();
+
+        public void Execute(float[] input)
         {
-            InputTensor = input;
+            InputValues = input;
             ++ExecuteCalled;
-            return this;
         }
 
-        public Tensor PeekOutput(string name)
+        public float[] PeekOutput(string name)
         {
             ++PeekOutputCalled;
-            if (!OutputTensors.ContainsKey(name)) return new();
+            if (!OutputTensors.ContainsKey(name)) return new float[1];
             return OutputTensors[name];
         }
 
         public void Dispose() => ++DisposeCalled;
-
-        public IWorker Execute() => null;
-        public IWorker Execute(IDictionary<string, Tensor> inputs) => null;
-        public void FlushSchedule(bool blocking = false) {}
-        public Tensor[] PeekConstants(string layerName) => Array.Empty<Tensor>();
-        public Tensor PeekOutput() => null;
-        public void PrepareForInput(IDictionary<string, TensorShape> inputShapes) {}
-        public void SetInput(Tensor x) {}
-        public void SetInput(string name, Tensor x) {}
-        public IEnumerator StartManualSchedule() => null;
-        public IEnumerator StartManualSchedule(Tensor input) => null;
-        public IEnumerator StartManualSchedule(IDictionary<string, Tensor> inputs) => null;
-        public string Summary() => string.Empty;
     }
 }

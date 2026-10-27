@@ -1,10 +1,10 @@
 using UnityEngine;
-using Unity.Barracuda;
+using Unity.InferenceEngine;
 using Zenject;
 
 public class DamageModifiersInstaller : MonoInstaller
 {
-    [SerializeField] private NNModel _kerasModel;
+    [SerializeField] private ModelAsset _kerasModel;
 
     public override void InstallBindings()
     {
