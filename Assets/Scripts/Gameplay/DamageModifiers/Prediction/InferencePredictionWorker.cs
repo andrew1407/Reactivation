@@ -1,11 +1,14 @@
 using Unity.InferenceEngine;
+using UnityEngine;
 
 public class InferencePredictionWorker : IPredictionWorker
 {
     public static InferencePredictionWorker FromModel(ModelAsset modelAsset)
     {
         Model runtimeModel = ModelLoader.Load(modelAsset);
-        Worker worker = new(runtimeModel, DeviceType.GPU);
+        // WebGL has no compute shaders, so the GPU backend is unavailable there
+        DeviceType device = SystemInfo.supportsComputeShaders ? DeviceType.GPU : DeviceType.CPU;
+        Worker worker = new(runtimeModel, device);
         return new InferencePredictionWorker(worker);
     }
 
