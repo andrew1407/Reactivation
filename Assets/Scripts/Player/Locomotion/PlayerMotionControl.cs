@@ -60,6 +60,6 @@ public class PlayerMotionControl
         Rigidbody attached = hit.collider.attachedRigidbody;
         if (attached == null || attached.isKinematic) return;
         var pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.x);
-        attached.velocity = pushDir * MotionParams.PushForce;
+        attached.linearVelocity = pushDir * MotionParams.PushForce;
     }
 }

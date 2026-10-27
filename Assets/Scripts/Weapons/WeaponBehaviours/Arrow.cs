@@ -19,7 +19,7 @@ public class Arrow : PlayerAmmo
         if (_state != ItemState.FREE || _state == ItemState.USED) return;
         _state = ItemState.USED;
         setComponentsState(state: false);
-        _rigidBody.velocity = _rigidBody.angularVelocity = Vector3.zero;
+        _rigidBody.linearVelocity = _rigidBody.angularVelocity = Vector3.zero;
         transform.SetParent(collision.transform);
 
         GameObject obj = collision.gameObject;

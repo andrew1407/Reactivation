@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Cinemachine;
+using Unity.Cinemachine;
 
 public sealed class GameUtils
 {
