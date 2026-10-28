@@ -1,0 +1,106 @@
+name: Game packages
+
+# Builds the game for Windows / Linux / macOS / Web and packs each build into one archive.
+# On a version tag it also attaches them to the GitHub release (creating it if missing);
+# otherwise it just uploads them as workflow artifacts, so every build is exercised on
+# each push that can change it.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    # Only what can change a build (GitHub does not apply path filters to tag pushes:
+    # a release always builds)
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - '.github/workflows/packages.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - '.github/workflows/packages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write  # attach assets to the release on a tag push
+
+# A newer push to the same ref supersedes an in-flight run (never cancel a release)
+concurrency:
+  group: packages-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  package:
+    name: Package (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The Linux editor images build every one of these with the Mono backend
+        include:
+          - { targetPlatform: StandaloneWindows64, name: Windows-x86_64, ext: zip }
+          - { targetPlatform: StandaloneLinux64,   name: Linux-x86_64,   ext: tar.gz }
+          - { targetPlatform: StandaloneOSX,       name: macOS,          ext: zip }
+          - { targetPlatform: WebGL,               name: Web,            ext: zip }
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # the semantic build version is derived from the tags
+          lfs: true
+      - uses: actions/cache@v5
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: Reactivation
+
+      # One archive per platform, named after the platform and the version (tag or short sha).
+      # tar and zip both keep the executable bits the Linux binary and the macOS .app need.
+      - name: Pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo chown -R "$(id -u):$(id -g)" build
+          version="${GITHUB_REF_NAME}"
+          [[ "$GITHUB_REF" == refs/tags/* ]] || version="${GITHUB_SHA::7}"
+          archive="$PWD/dist/Reactivation-${version}-${{ matrix.name }}.${{ matrix.ext }}"
+          mkdir -p dist
+          cd build/${{ matrix.targetPlatform }}
+          # The player's debug-only leftovers are not shipped
+          rm -rf ./*_BurstDebugInformation_DoNotShip ./*_BackUpThisFolder_ButDontShipItWithYourGame
+          case "${{ matrix.ext }}" in
+            zip)    zip -qry "$archive" . ;;
+            tar.gz) tar -czf "$archive" . ;;
+          esac
+          ls -lh "$archive"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: Reactivation-${{ matrix.name }}
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Attach to release  # tag push only; creates the release if missing
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --generate-notes || true
+          gh release upload "${GITHUB_REF_NAME}" dist/* --clobber

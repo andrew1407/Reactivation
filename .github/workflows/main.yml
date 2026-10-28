@@ -1,5 +1,6 @@
-name: Build & test project
+name: Tests
 
+# Runs the edit- and play-mode test suites; the platform builds live in packages.yml
 on:
   push:
     branches: [main]
@@ -13,59 +14,13 @@ permissions:
 
 # A newer push to the same ref supersedes an in-flight run
 concurrency:
-  group: ci-${{ github.ref }}
+  group: tests-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  # Personal licenses activate with the account itself (manual .alf activation is gone):
-  # UNITY_LICENSE is the contents of the .ulf from a local activation
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
 jobs:
-  build:
-    name: Build for ${{ matrix.targetPlatform }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # Every non-console target the Linux editor images can produce
-        # (all use the Mono backend, so no platform-native IL2CPP toolchain is needed)
-        targetPlatform:
-          - StandaloneWindows64
-          - StandaloneLinux64
-          - StandaloneOSX
-          - WebGL
-          - Android
-          - iOS          # an Xcode project, to be signed and built on a Mac
-    steps:
-      # Editor images for mobile targets are large; the stock runner runs out of disk without this
-      - name: Free disk space
-        if: matrix.targetPlatform == 'Android' || matrix.targetPlatform == 'iOS'
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          lfs: true
-      - uses: actions/cache@v5
-        with:
-          path: Library
-          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
-          restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
-            Library-
-      - uses: game-ci/unity-builder@v4
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-      - uses: actions/upload-artifact@v6
-        with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
-
   test:
     name: Test in ${{ matrix.testMode }}
     runs-on: ubuntu-latest
@@ -88,6 +43,12 @@ jobs:
             Library-
       - uses: game-ci/unity-test-runner@v4
         id: tests
+        env:
+          # Personal licenses activate with the account itself (manual .alf activation is gone):
+          # UNITY_LICENSE is the contents of the .ulf from a local activation
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           testMode: ${{ matrix.testMode }}
           artifactsPath: ${{ matrix.testMode }}-artifacts

@@ -1,13 +1,14 @@
 # Reactivation
 
-[![Build & test](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml)
-[![GitHub Pages](https://github.com/andrew1407/Reactivation/actions/workflows/pages.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions/workflows/pages.yml)
-
 <p align="center">
   <a href="https://andrew1407.github.io/Reactivation/">
     <img src="./Assets/Images/Icons/icon.png" width="140" alt="Reactivation Logo" />
   </a>
 </p>
+
+[![Tests](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml)
+[![Game packages](https://github.com/andrew1407/Reactivation/actions/workflows/packages.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions/workflows/packages.yml)
+[![GitHub Pages](https://github.com/andrew1407/Reactivation/actions/workflows/pages.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions/workflows/pages.yml)
 
 ## Description
 
