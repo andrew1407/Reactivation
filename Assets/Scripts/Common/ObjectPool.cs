@@ -54,7 +54,7 @@ public class ObjectPool<T>
     
     public List<T> GetReserved() => findSpecified(free: false).Select(c => c.Value).ToList();
 
-    public List<T> GetAllValues() => _containedObjects.Select(c => c.Value).ToList();
+    public List<T> GetAllValues() => withLock(() => _containedObjects.Select(c => c.Value).ToList());
 
     public bool CheckFree(T value) => withLock(() =>
     {
@@ -81,11 +81,7 @@ public class ObjectPool<T>
         return shouldFree;
     });
 
-    public bool Has(T value)
-    {
-        Container found = _containedObjects.Find(c => object.Equals(value, c.Value));
-        return found != null;
-    }
+    public bool Has(T value) => withLock(() => _containedObjects.Exists(c => object.Equals(value, c.Value)));
 
     #endregion
 
