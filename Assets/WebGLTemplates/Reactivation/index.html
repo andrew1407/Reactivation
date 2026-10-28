@@ -86,8 +86,16 @@
           progressFull.style.width = 100 * progress + "%";
         }).then((unityInstance) => {
           loading.style.display = "none";
-          fullscreen.style.display = "block";
           fullscreen.onclick = () => unityInstance.SetFullscreen(1);
+          // Only offered while windowed: the browser's own fullscreen (F11) doesn't go through the fullscreen API,
+          // so a window covering the whole screen counts as fullscreen too
+          const isFullscreen = () => !!document.fullscreenElement
+            || matchMedia("(display-mode: fullscreen)").matches
+            || (innerWidth >= screen.width && innerHeight >= screen.height);
+          const updateFullscreenButton = () => fullscreen.style.display = isFullscreen() ? "none" : "block";
+          addEventListener("resize", updateFullscreenButton);
+          document.addEventListener("fullscreenchange", updateFullscreenButton);
+          updateFullscreenButton();
           // Keyboard and mouse input go to the game once it's clicked
           canvas.focus();
         }).catch((message) => unityShowBanner(message, "error"));
