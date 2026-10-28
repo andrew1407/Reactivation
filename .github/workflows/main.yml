@@ -1,11 +1,10 @@
-name: Tests
+name: Build & test project
 
-# Runs the edit- and play-mode test suites; the platform builds live in packages.yml
 on:
   push:
     branches: [main]
-    # Only what the tests compile or load: README, docs, the notebook and the Blender sources
-    # under Models/ change nothing they run, so pushes touching only those start no job
+    tags: ['v*']        # a version tag also publishes the builds as a GitHub release (tags ignore the paths below)
+    # Only what goes into the game or its build: README, Doc/, build.ps1 and the like don't start a run
     paths:
       - 'Assets/**'
       - 'Packages/**'
@@ -18,7 +17,7 @@ on:
       - 'Packages/**'
       - 'ProjectSettings/**'
       - '.github/workflows/main.yml'
-  workflow_dispatch:
+  workflow_dispatch:   # run on demand, whatever changed
 
 permissions:
   contents: read
@@ -26,11 +25,16 @@ permissions:
 
 # A newer push to the same ref supersedes an in-flight run
 concurrency:
-  group: tests-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # Personal licenses activate with the account itself (manual .alf activation is gone):
+  # UNITY_LICENSE is the contents of the .ulf from a local activation
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
 jobs:
   test:
@@ -38,6 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
         testMode:
           - playmode
@@ -46,21 +51,39 @@ jobs:
       - uses: actions/checkout@v5
         with:
           lfs: true
+      # Unity 6.6 keeps its Data Store in Library; it belongs to the machine that made it,
+      # so every job starts it fresh
       - uses: actions/cache@v5
         with:
-          path: Library
-          key: Library-test-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          path: |
+            Library
+            !Library/DataStore
+          key: Library-v2-test-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
           restore-keys: |
-            Library-test-
-            Library-
+            Library-v2-test-
+            Library-v2-
+      # Each test or build launches Unity right after the activation run, and both start a Data Store that takes a
+      # 1 GB shared memory block while game-ci's container only has room for one: when the first hasn't let go yet,
+      # the second editor is killed (exit 137). It's a race, so the Unity step gets two more tries
       - uses: game-ci/unity-test-runner@v4
         id: tests
-        env:
-          # Personal licenses activate with the account itself (manual .alf activation is gone):
-          # UNITY_LICENSE is the contents of the .ulf from a local activation
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        continue-on-error: true
+        with:
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ matrix.testMode }}-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: ${{ matrix.testMode }} Test Results
+      - uses: game-ci/unity-test-runner@v4
+        id: tests-retry
+        if: steps.tests.outcome == 'failure'
+        continue-on-error: true
+        with:
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ matrix.testMode }}-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: ${{ matrix.testMode }} Test Results
+      - uses: game-ci/unity-test-runner@v4
+        if: steps.tests-retry.outcome == 'failure'
         with:
           testMode: ${{ matrix.testMode }}
           artifactsPath: ${{ matrix.testMode }}-artifacts
@@ -70,4 +93,110 @@ jobs:
         if: always()
         with:
           name: Test results for ${{ matrix.testMode }}
-          path: ${{ steps.tests.outputs.artifactsPath }}
+          path: ${{ matrix.testMode }}-artifacts
+
+  build:
+    name: Build for ${{ matrix.platform }}
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        # Desktop and web targets the Linux editor images can produce
+        # (all use the Mono backend, so no platform-native IL2CPP toolchain is needed)
+        include:
+          - targetPlatform: StandaloneWindows64
+            platform: Windows
+            archive: zip
+          - targetPlatform: StandaloneLinux64
+            platform: Linux
+            archive: tar.gz   # keeps the executable bit
+          - targetPlatform: StandaloneOSX
+            platform: macOS
+            archive: zip
+          - targetPlatform: WebGL
+            platform: WebGL
+            archive: zip
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          lfs: true
+      - uses: actions/cache@v5
+        with:
+          path: |
+            Library
+            !Library/DataStore
+          key: Library-v2-${{ matrix.targetPlatform }}-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-v2-${{ matrix.targetPlatform }}-
+            Library-v2-
+      # Same race as in the tests, so two more tries; game-ci leaves its build script copy behind,
+      # which a retry has to accept as a dirty branch
+      - uses: game-ci/unity-builder@v4
+        id: build
+        continue-on-error: true
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: Reactivation
+      - uses: game-ci/unity-builder@v4
+        id: build-retry
+        if: steps.build.outcome == 'failure'
+        continue-on-error: true
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: Reactivation
+          allowDirtyBuild: true
+      - uses: game-ci/unity-builder@v4
+        if: steps.build-retry.outcome == 'failure'
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: Reactivation
+          allowDirtyBuild: true
+
+      - name: Package
+        env:
+          ARCHIVE: Reactivation-${{ matrix.platform }}.${{ matrix.archive }}
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" build
+          cd build/${{ matrix.targetPlatform }}
+          # Debugging leftovers Unity marks as not for shipping
+          rm -rf -- *DoNotShip *DontShipItWithYourGame
+          # WebGL is built into its own folder; ship its contents so index.html sits at the archive root
+          if [ "${{ matrix.platform }}" = "WebGL" ]; then cd Reactivation; fi
+          if [ "${{ matrix.archive }}" = "tar.gz" ]; then
+            tar -czf "$GITHUB_WORKSPACE/$ARCHIVE" .
+          else
+            zip -qry "$GITHUB_WORKSPACE/$ARCHIVE" .
+          fi
+          ls -lh "$GITHUB_WORKSPACE/$ARCHIVE"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: Reactivation-${{ matrix.platform }}
+          path: Reactivation-${{ matrix.platform }}.${{ matrix.archive }}
+          compression-level: 0   # already compressed
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          pattern: Reactivation-*
+          path: dist
+          merge-multiple: true
+      - name: Attach builds to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls -lh dist
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --generate-notes --verify-tag
+          gh release upload "$TAG" dist/* --clobber
