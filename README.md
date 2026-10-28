@@ -27,17 +27,13 @@ Class diagram for main clases in the project:
 
 ## Gameplay
 
-![Gameplay 1](./Doc/Resources/Gameplay/gameplay-1.png)
+![Gameplay](./Doc/Resources/Gameplay/gameplay.png)
 
-![Gameplay 2](./Doc/Resources/Gameplay/gameplay-2.png)
+![Grenade blast](./Doc/Resources/Gameplay/grenade.gif)
 
-![Gameplay 3](./Doc/Resources/Gameplay/gameplay-3.png)
+![Machete](./Doc/Resources/Gameplay/machete.gif)
 
-![Gameplay 4](./Doc/Resources/Gameplay/gameplay-4.png)
-
-![Gameplay 5](./Doc/Resources/Gameplay/gameplay-5.png)
-
-![Gameplay 6](./Doc/Resources/Gameplay/gameplay-6.png)
+![Crossbow jump shot](./Doc/Resources/Gameplay/crossbow.gif)
 
 ## Testing
 
