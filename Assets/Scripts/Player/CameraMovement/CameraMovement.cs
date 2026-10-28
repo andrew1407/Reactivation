@@ -8,7 +8,8 @@ public class CameraMovement
 
     [Inject] private readonly CharacterComponents _characterComponents;
 
-    private const float _mouseMoveDelta = 0.05f;
+    // Pointer travel (pixels) that turns the camera as far as a full stick does in one second
+    private const float _pointerPixelsPerMaxSpeed = 1000;
 
     private readonly int _aimingLabelHash = Animator.StringToHash("aiming");
 
@@ -41,10 +42,16 @@ public class CameraMovement
         _rotationParamsState = rotationMaxSpeed * rotationInversion;
     }
 
-    public void UpdateRotation(Vector2 direction)
+    // A stick reports a rate (-1..1), so it turns by max speed over the frame's time
+    public void RotateByStick(Vector2 direction) => rotate(direction * Time.deltaTime * _rotationParamsState);
+
+    // A pointer reports the distance moved since the last frame: it maps straight to an angle,
+    // with no frame time involved, so the turn doesn't depend on frame rate (or window size)
+    public void RotateByPointer(Vector2 delta) => rotate(delta / _pointerPixelsPerMaxSpeed * _rotationParamsState);
+
+    private void rotate(Vector2 angles)
     {
-        if (direction.magnitude > 1) direction *= _mouseMoveDelta;
-        CameraValues += direction * Time.deltaTime * _rotationParamsState;
+        CameraValues += angles;
         _movementParams.Target.eulerAngles = new Vector3(_movementParams.CameraY.Value, _movementParams.CameraX.Value, 0);
         rotatePlayerByCamera();
     }

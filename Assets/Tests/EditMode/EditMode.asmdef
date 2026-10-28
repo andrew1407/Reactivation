@@ -8,7 +8,8 @@
         "Zenject-TestFramework",
         "Core",
         "Unity.InferenceEngine",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.Cinemachine"
     ],
     "includePlatforms": [
         "Editor"
