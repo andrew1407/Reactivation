@@ -12,6 +12,12 @@ public class DamageModifiersSystem : ILateDisposable
     public void PickModifier()
     {
         IDamageModifier previous = _pickedModifier;
+        // A single modifier can never differ from the previous pick
+        if (_damageModifiers.Length == 1)
+        {
+            _pickedModifier = _damageModifiers[0];
+            return;
+        }
         do
         {
             int index = Random.Range(0, _damageModifiers.Length);
