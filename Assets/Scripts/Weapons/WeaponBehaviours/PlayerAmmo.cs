@@ -54,6 +54,14 @@ public abstract class PlayerAmmo : MonoBehaviour, IAmmo
         _cleanupPeriodAccumulator = 0;
     }
     
+    // Called before the target it's stuck in is deactivated: hidden in its place, the item keeps
+    // counting down its cleanup and returns to the pool as usual instead of going inactive with it
+    public void DetachFromTarget()
+    {
+        transform.SetParent(null, worldPositionStays: true);
+        _ammoView.SetActive(false);
+    }
+
     protected void setComponentsState(bool state)
     {
         _collider.enabled = state;

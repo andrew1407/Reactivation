@@ -18,8 +18,9 @@ public class Arrow : PlayerAmmo
     {
         if (_state != ItemState.FREE || _state == ItemState.USED) return;
         _state = ItemState.USED;
-        setComponentsState(state: false);
+        // Stopped while still dynamic: a kinematic body can't have its velocity set
         _rigidBody.linearVelocity = _rigidBody.angularVelocity = Vector3.zero;
+        setComponentsState(state: false);
         transform.SetParent(collision.transform);
 
         GameObject obj = collision.gameObject;
