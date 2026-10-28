@@ -34,7 +34,16 @@ public class SceneManager : MonoBehaviour
         _playOptionsSwitch.SetOptionState(WaveState.IDLE);
     }
 
-    private void quit(InputAction.CallbackContext _) => Application.Quit();
+    private void quit(InputAction.CallbackContext _)
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // A page can't close its browser tab: quitting would only stop the player under the still running page
+        // (the next frame then crashes on freed memory). The browser already gives Escape its own meaning there:
+        // freeing the mouse and leaving fullscreen
+#else
+        Application.Quit();
+#endif
+    }
 
     private void pause(InputAction.CallbackContext _) => _gameManager.SwitchPauseState();
 
