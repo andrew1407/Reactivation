@@ -12,7 +12,7 @@
 
 ## Description
 
-A third-person shooter made with Unity. The game collects player's metrics (during gameplay) to affect on weapon damage modifiers based on their play style, strategy (activity of usage). The project uses **Barracuda** module to load a runtime model of ONNX format to operate input/output data (gather and predict values). It is a practical part of the **[bachelor's work](https://ela.kpi.ua/items/f57022f0-be84-4b3d-aa0e-f38f550e1ee1)**.
+A third-person shooter made with Unity. The game collects player's metrics (during gameplay) to affect on weapon damage modifiers based on their play style, strategy (activity of usage). The project uses Unity's **Inference Engine** (formerly Barracuda) to load a runtime model of ONNX format to operate input/output data (gather and predict values). It is a practical part of the **[bachelor's work](https://ela.kpi.ua/items/f57022f0-be84-4b3d-aa0e-f38f550e1ee1)**.
 
 Neural network model architecture (**[here's](/NeuralNetwork/damage_modifiers.ipynb)** a Python notebook):
 
@@ -40,3 +40,28 @@ Class diagram for main clases in the project:
 
 ![Gameplay 6](./Doc/Resources/Gameplay/gameplay-6.png)
 
+## Testing
+
+Edit mode tests cover the gameplay logic (damage modifiers, kill stats, waves and timer, health, the object pool, camera input, stuck ammo); a play mode smoke test loads the main scene and checks the player spawns. Run them from **Window → General → Test Runner** or headless:
+
+```
+Unity -batchmode -projectPath . -runTests -testPlatform EditMode -testResults editmode.xml
+Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testResults playmode.xml
+```
+
+## Building locally
+
+Use the **Build** menu in the editor, or [build.ps1](build.ps1) to build with the project's Unity version in batch mode and zip the results into `Builds/` (close the project in the editor first):
+
+```
+./build.ps1                                        # Windows + WebGL
+./build.ps1 -Platforms Windows,Linux,macOS,WebGL   # every platform whose build support module is installed
+```
+
+The web build runs on WebGPU where the browser supports it and falls back to WebGL 2 otherwise; serve `Builds/WebGL` over HTTP (opening `index.html` from disk won't load it).
+
+The machete model is kept as an FBX under `Assets/`; its editable Blender source lives in [Models/](Models) so builds don't need Blender installed.
+
+## Releases
+
+Pushing a version tag (`git tag v1.0.0 && git push origin v1.0.0`) builds Windows, Linux, macOS and Web packages and attaches them to the GitHub release. The web build is also deployed to [GitHub Pages](https://andrew1407.github.io/Reactivation/) on every push to `main` that changes the game.

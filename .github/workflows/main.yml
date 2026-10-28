@@ -4,8 +4,20 @@ name: Tests
 on:
   push:
     branches: [main]
+    # Only what the tests compile or load: README, docs, the notebook and the Blender sources
+    # under Models/ change nothing they run, so pushes touching only those start no job
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - '.github/workflows/main.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - '.github/workflows/main.yml'
   workflow_dispatch:
 
 permissions:
