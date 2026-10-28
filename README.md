@@ -59,9 +59,3 @@ Use the **Build** menu in the editor, or [build.ps1](build.ps1) to build with th
 ```
 
 The web build runs on WebGPU where the browser supports it and falls back to WebGL 2 otherwise; serve `Builds/WebGL` over HTTP (opening `index.html` from disk won't load it).
-
-The machete model is kept as an FBX under `Assets/`; its editable Blender source lives in [Models/](Models) so builds don't need Blender installed.
-
-## Releases
-
-Pushing a version tag (`git tag v1.0.0 && git push origin v1.0.0`) builds Windows, Linux, macOS and Web packages and attaches them to the GitHub release. The web build is also deployed to [GitHub Pages](https://andrew1407.github.io/Reactivation/) on every push to `main` that changes the game.
