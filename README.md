@@ -6,8 +6,7 @@
   </a>
 </p>
 
-[![Tests](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml)
-[![Game packages](https://github.com/andrew1407/Reactivation/actions/workflows/packages.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions/workflows/packages.yml)
+[![Build & test](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions/workflows/main.yml)
 [![GitHub Pages](https://github.com/andrew1407/Reactivation/actions/workflows/pages.yml/badge.svg)](https://github.com/andrew1407/Reactivation/actions/workflows/pages.yml)
 
 ## Description
