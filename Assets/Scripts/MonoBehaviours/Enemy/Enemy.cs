@@ -34,6 +34,7 @@ public class Enemy : MonoBehaviour, IDamageTaker
 
     public void Die(bool deathEffect = true)
     {
+        foreach (var ammo in GetComponentsInChildren<PlayerAmmo>()) ammo.DetachFromTarget();
         gameObject.SetActive(false);
         if (!deathEffect) return;
         GameObject deathSmoke = Instantiate(_deathEffectPrefab, transform.position, Quaternion.identity);
