@@ -107,8 +107,10 @@ public class PlayerInputController : CharacterAim
 
     private void updateCameraRotation()
     {
-        var lookDirection = _inputActions.Player.Look.ReadValue<Vector2>();
-        _cameraMovement.UpdateRotation(lookDirection);
+        InputAction look = _inputActions.Player.Look;
+        var lookDirection = look.ReadValue<Vector2>();
+        if (look.activeControl?.device is Pointer) _cameraMovement.RotateByPointer(lookDirection);
+        else _cameraMovement.RotateByStick(lookDirection);
     }
 
     private void updateLocomotionState()
