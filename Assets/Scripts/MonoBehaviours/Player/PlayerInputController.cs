@@ -21,6 +21,8 @@ public class PlayerInputController : CharacterAim
 
     [Inject] private IWeapon[] _weapons;
 
+    [Inject] private readonly TouchControls _touchControls;
+
     private readonly Dictionary<Vector2, Action> _weaponSlots = new();
 
     private PlayerInputActions _inputActions;
@@ -64,9 +66,11 @@ public class PlayerInputController : CharacterAim
 
     private void Update()
     {
+        // Taken even when it isn't used, or a drag during a pause would turn the camera at once after it
+        Vector2 touchLook = _touchControls.LookArea.ConsumeDelta();
         if (_gameManager.GamePaused) return;
         updateLocomotionState();
-        updateCameraRotation();
+        updateCameraRotation(touchLook);
         if (_attacking && _currentAction == null) startAction(useWeapon());
     }
 
@@ -80,19 +84,17 @@ public class PlayerInputController : CharacterAim
 
     #region InputContextHandlers
 
+    private void jump(InputAction.CallbackContext _) => jump();
+
     private void turnOnAiming(InputAction.CallbackContext _) => _cameraMovement.Aiming = true;
 
     private void turnOffAiming(InputAction.CallbackContext _) => _cameraMovement.Aiming = false;
 
-    private void enableAttack(InputAction.CallbackContext _) => _attacking = true;
+    private void enableAttack(InputAction.CallbackContext _) => enableAttack();
 
-    private void disableAttack(InputAction.CallbackContext _) => _attacking = false;
+    private void disableAttack(InputAction.CallbackContext _) => disableAttack();
 
-    private void switchWeapon(InputAction.CallbackContext context)
-    {
-        var key = context.ReadValue<Vector2>();
-        if (_weaponSlots.ContainsKey(key)) _weaponSlots[key]();
-    }
+    private void switchWeapon(InputAction.CallbackContext context) => switchWeapon(context.ReadValue<Vector2>());
 
     private void scrollWeapons(InputAction.CallbackContext context)
     {
@@ -105,8 +107,14 @@ public class PlayerInputController : CharacterAim
 
     #region ToolingMethods
 
-    private void updateCameraRotation()
+    private void updateCameraRotation(Vector2 touchLook)
     {
+        // A rotation also turns the player towards the camera, so it's one per frame whatever the input
+        if (touchLook != Vector2.zero)
+        {
+            _cameraMovement.RotateByPointer(touchLook);
+            return;
+        }
         InputAction look = _inputActions.Player.Look;
         var lookDirection = look.ReadValue<Vector2>();
         if (look.activeControl?.device is Pointer) _cameraMovement.RotateByPointer(lookDirection);
@@ -115,13 +123,22 @@ public class PlayerInputController : CharacterAim
 
     private void updateLocomotionState()
     {
-        var input = _inputActions.Player.Move.ReadValue<Vector2>();
-        _locomotionStateMachine.SetMotionInput(input);
+        var input = _inputActions.Player.Move.ReadValue<Vector2>() + _touchControls.MoveStick.Value;
+        _locomotionStateMachine.SetMotionInput(Vector2.ClampMagnitude(input, 1));
     }
 
-    private void jump(InputAction.CallbackContext _)
+    private void jump()
     {
         if (!_gameManager.GamePaused) _locomotionStateMachine.Jump();
+    }
+
+    private void enableAttack() => _attacking = true;
+
+    private void disableAttack() => _attacking = false;
+
+    private void switchWeapon(Vector2 slot)
+    {
+        if (_weaponSlots.TryGetValue(slot, out Action selectWeapon)) selectWeapon();
     }
 
     private IEnumerator waitForActionFinish(IEnumerator action)
@@ -152,6 +169,10 @@ public class PlayerInputController : CharacterAim
             _inputActions.Player.Attack.canceled += disableAttack;
             _inputActions.Player.WeaponSlots.started += switchWeapon;
             _inputActions.Player.WeaponSelector.started += scrollWeapons;
+            _touchControls.Jump.Pressed += jump;
+            _touchControls.Attack.Pressed += enableAttack;
+            _touchControls.Attack.Released += disableAttack;
+            _touchControls.WeaponCross.SlotSelected += switchWeapon;
         }
         else
         {
@@ -163,6 +184,10 @@ public class PlayerInputController : CharacterAim
             _inputActions.Player.Attack.canceled -= disableAttack;
             _inputActions.Player.WeaponSlots.started -= switchWeapon;
             _inputActions.Player.WeaponSelector.started -= scrollWeapons;
+            _touchControls.Jump.Pressed -= jump;
+            _touchControls.Attack.Pressed -= enableAttack;
+            _touchControls.Attack.Released -= disableAttack;
+            _touchControls.WeaponCross.SlotSelected -= switchWeapon;
         }
     }
     

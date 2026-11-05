@@ -11,10 +11,10 @@ public class ObjectPoolTests
     {
         ObjectPool<int> pool = new(3, i => i * 10);
 
-        Assert.AreEqual(3, pool.Size);
-        Assert.AreEqual(3, pool.Free);
-        Assert.AreEqual(0, pool.Reserved);
-        CollectionAssert.AreEqual(new[] { 0, 10, 20 }, pool.GetAllValues());
+        Assert.AreEqual(3, pool.Size, "The factory should fill the pool");
+        Assert.AreEqual(3, pool.Free, "New objects should be free");
+        Assert.AreEqual(0, pool.Reserved, "Nothing should be reserved yet");
+        CollectionAssert.AreEqual(new[] { 0, 10, 20 }, pool.GetAllValues(), "The factory should get each index");
     }
 
     [Test]
@@ -27,7 +27,7 @@ public class ObjectPoolTests
 
         Assert.IsTrue(first, "A new value should be added");
         Assert.IsFalse(second, "A value already in the pool shouldn't be added again");
-        Assert.AreEqual(1, pool.Size);
+        Assert.AreEqual(1, pool.Size, "A duplicate shouldn't grow the pool");
     }
 
     [Test]
@@ -37,10 +37,10 @@ public class ObjectPoolTests
 
         int given = pool.Give();
 
-        Assert.AreEqual(0, given);
-        Assert.IsTrue(pool.CheckReserved(given));
-        Assert.AreEqual(1, pool.Free);
-        Assert.AreEqual(1, pool.Reserved);
+        Assert.AreEqual(0, given, "The first free object should be given");
+        Assert.IsTrue(pool.CheckReserved(given), "A given object should be reserved");
+        Assert.AreEqual(1, pool.Free, "One object should stay free");
+        Assert.AreEqual(1, pool.Reserved, "One object should be reserved");
     }
 
     [Test]
@@ -51,7 +51,7 @@ public class ObjectPoolTests
         pool.Give();
         string given = pool.Give();
 
-        Assert.IsNull(given);
+        Assert.IsNull(given, "An exhausted pool should give the default value");
     }
 
     [Test]
@@ -61,7 +61,7 @@ public class ObjectPoolTests
 
         int given = pool.Give(value => value > 1);
 
-        Assert.AreEqual(2, given);
+        Assert.AreEqual(2, given, "The first match should be given");
         Assert.IsTrue(pool.CheckFree(0), "Objects skipped by the search should stay free");
     }
 
@@ -73,9 +73,9 @@ public class ObjectPoolTests
 
         bool put = pool.Put(given);
 
-        Assert.IsTrue(put);
-        Assert.IsTrue(pool.CheckFree(given));
-        Assert.AreEqual(2, pool.Free);
+        Assert.IsTrue(put, "A reserved object should be accepted back");
+        Assert.IsTrue(pool.CheckFree(given), "A returned object should be free");
+        Assert.AreEqual(2, pool.Free, "The whole pool should be free again");
     }
 
     [Test]
@@ -92,8 +92,8 @@ public class ObjectPoolTests
     {
         ObjectPool<int> pool = new(1, i => i);
 
-        Assert.Throws<DataException>(() => pool.CheckFree(42));
-        Assert.Throws<DataException>(() => { bool _ = pool[42]; });
+        Assert.Throws<DataException>(() => pool.CheckFree(42), "CheckFree should refuse an unknown object");
+        Assert.Throws<DataException>(() => { bool _ = pool[42]; }, "The indexer should refuse an unknown object");
     }
 
     [Test]
@@ -103,8 +103,8 @@ public class ObjectPoolTests
 
         pool.Give();
 
-        CollectionAssert.AreEqual(new[] { 1, 2 }, pool.GetFree());
-        CollectionAssert.AreEqual(new[] { 0 }, pool.GetReserved());
+        CollectionAssert.AreEqual(new[] { 1, 2 }, pool.GetFree(), "Only free objects should be listed");
+        CollectionAssert.AreEqual(new[] { 0 }, pool.GetReserved(), "Only reserved objects should be listed");
     }
 
     [Test]
@@ -118,9 +118,9 @@ public class ObjectPoolTests
         pool.Remove(value => value == 3);
         pool.Remove((value, free) => !free);
 
-        Assert.IsTrue(removed);
-        Assert.IsFalse(removedUnknown);
-        CollectionAssert.AreEqual(new[] { 1, 2 }, pool.GetAllValues());
+        Assert.IsTrue(removed, "A contained object should be removed");
+        Assert.IsFalse(removedUnknown, "An unknown object can't be removed");
+        CollectionAssert.AreEqual(new[] { 1, 2 }, pool.GetAllValues(), "Only the objects no removal matched should stay");
     }
 
     [Test]
@@ -132,9 +132,9 @@ public class ObjectPoolTests
         pool += 2;
         pool -= 1;
 
-        Assert.IsTrue(pool.Has(2));
-        Assert.IsFalse(pool.Has(1));
-        Assert.AreEqual(1, pool.Size);
+        Assert.IsTrue(pool.Has(2), "The operator should add the value");
+        Assert.IsFalse(pool.Has(1), "The operator should remove the value");
+        Assert.AreEqual(1, pool.Size, "Only the remaining value should count");
     }
 
     [Test]
@@ -148,6 +148,6 @@ public class ObjectPoolTests
 
         Assert.AreEqual(size, received.Count, "Every object should be given exactly once");
         Assert.AreEqual(size, received.Distinct().Count(), "No object should be given twice");
-        Assert.AreEqual(0, pool.Free);
+        Assert.AreEqual(0, pool.Free, "No object should stay free");
     }
 }

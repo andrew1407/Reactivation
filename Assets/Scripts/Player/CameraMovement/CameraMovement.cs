@@ -61,7 +61,7 @@ public class CameraMovement
     private void rotatePlayerByCamera()
     {
         float y = _cameraTransform.rotation.eulerAngles.y;
-        float ratio = _movementParams.TurnFollowSpeed * Time.fixedDeltaTime;
+        float ratio = _movementParams.TurnFollowSpeed * Time.deltaTime;
         var transform = _characterComponents.Transform;
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, y, 0), ratio);
     }

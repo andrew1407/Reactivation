@@ -6,13 +6,13 @@ using UnityEditor;
 // Nothing in the player uses it (its C# side only compiles with APPUI_ENABLE_SYNTAX_HIGHLIGHTING),
 // and package files are read-only, so it is left out of builds here instead.
 [InitializeOnLoad]
-public static class ExcludeAppUiTextMateFromWeb
+public sealed class ExcludeAppUiTextMateFromWeb
 {
-    private const string PluginPath = "Packages/com.unity.dt.app-ui/Runtime/Core/Platform/WebGL/Plugins/libAppUITextMateLib.a";
+    private const string _pluginPath = "Packages/com.unity.dt.app-ui/Runtime/Core/Platform/WebGL/Plugins/libAppUITextMateLib.a";
 
     static ExcludeAppUiTextMateFromWeb()
     {
-        if (AssetImporter.GetAtPath(PluginPath) is PluginImporter importer)
+        if (AssetImporter.GetAtPath(_pluginPath) is PluginImporter importer)
             importer.SetIncludeInBuildDelegate(_ => false);
     }
 }

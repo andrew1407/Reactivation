@@ -40,6 +40,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "UseTouch",
+                    "type": "Button",
+                    "id": "6f0c3a51-2b7e-4d1f-9a44-1e5c7d20a301",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LeaveTouch",
+                    "type": "Button",
+                    "id": "b2d94e17-83c6-4f0a-a6d3-50f1c8e7b402",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -128,6 +146,39 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "ShowControls",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c81e2f60-4a3d-4b57-8f19-7d6a0b3e9c03",
+                    "path": "<Touchscreen>/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "UseTouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d3a7105c-96be-42c8-b1e4-2f8c6d4a1e04",
+                    "path": "<Gamepad>/*",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "LeaveTouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e94b6c28-1f70-4d3a-9c25-a3e7f0b5d605",
+                    "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse & Keyboard",
+                    "action": "LeaveTouch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

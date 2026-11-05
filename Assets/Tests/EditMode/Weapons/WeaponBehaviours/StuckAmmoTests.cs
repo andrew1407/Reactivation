@@ -47,6 +47,6 @@ public class StuckAmmoTests
 
         _enemy.GetComponent<Enemy>().Die(deathEffect: false);
 
-        Assert.AreEqual(new Vector3(3, 1, 5), _arrow.transform.position);
+        Assert.AreEqual(new Vector3(3, 1, 5), _arrow.transform.position, "The arrow should stay where it was stuck");
     }
 }

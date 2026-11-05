@@ -14,6 +14,10 @@ public class SceneManager : MonoBehaviour
 
     [Inject] private readonly GameManager _gameManager;
 
+    [Inject] private readonly TouchMode _touchMode;
+
+    [Inject] private readonly TouchControls _touchControls;
+
     private UiInputActions _uiInputActions;
 
     private void Awake() => _uiInputActions = new();
@@ -25,7 +29,11 @@ public class SceneManager : MonoBehaviour
     private void Start()
     {
         Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        lockCursor(isTouch: _touchMode.IsActive);
+#if UNITY_ANDROID || UNITY_IOS
+        // Phones cap the game at 30 otherwise
+        Application.targetFrameRate = 60;
+#endif
 
         _damageModifiersSystem.ShowModifications();
 
@@ -45,13 +53,22 @@ public class SceneManager : MonoBehaviour
 #endif
     }
 
-    private void pause(InputAction.CallbackContext _) => _gameManager.SwitchPauseState();
+    private void pause(InputAction.CallbackContext _) => pause();
+
+    private void pause() => _gameManager.SwitchPauseState();
 
     private void showControls(InputAction.CallbackContext _) => setControlsState(true);
 
     private void hideControls(InputAction.CallbackContext _) => setControlsState(false);
 
     private void submitAction(InputAction.CallbackContext _) => _playOptionsSwitch.ActivateOption();
+
+    private void useTouch(InputAction.CallbackContext _) => _touchMode.OnTouch();
+
+    private void leaveTouch(InputAction.CallbackContext _) => _touchMode.OnOtherDevice();
+
+    // There's no pointer to capture on a touch screen, and a mobile browser would only refuse it
+    private void lockCursor(bool isTouch) => Cursor.lockState = isTouch ? CursorLockMode.None : CursorLockMode.Locked;
 
     private void setControlsState(bool state)
     {
@@ -69,6 +86,10 @@ public class SceneManager : MonoBehaviour
             _uiInputActions.UI.Submit.performed += submitAction;
             _uiInputActions.UI.ShowControls.started += showControls;
             _uiInputActions.UI.ShowControls.canceled += hideControls;
+            _uiInputActions.UI.UseTouch.performed += useTouch;
+            _uiInputActions.UI.LeaveTouch.performed += leaveTouch;
+            _touchControls.Pause.Pressed += pause;
+            _touchMode.Changed += lockCursor;
         }
         else
         {
@@ -78,6 +99,10 @@ public class SceneManager : MonoBehaviour
             _uiInputActions.UI.Submit.performed -= submitAction;
             _uiInputActions.UI.ShowControls.started -= showControls;
             _uiInputActions.UI.ShowControls.canceled -= hideControls;
+            _uiInputActions.UI.UseTouch.performed -= useTouch;
+            _uiInputActions.UI.LeaveTouch.performed -= leaveTouch;
+            _touchControls.Pause.Pressed -= pause;
+            _touchMode.Changed -= lockCursor;
         }
     }
 }

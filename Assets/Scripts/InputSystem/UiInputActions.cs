@@ -131,6 +131,26 @@ public partial class @UiInputActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""UseTouch"",
+                    ""type"": ""Button"",
+                    ""id"": ""6f0c3a51-2b7e-4d1f-9a44-1e5c7d20a301"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""LeaveTouch"",
+                    ""type"": ""Button"",
+                    ""id"": ""b2d94e17-83c6-4f0a-a6d3-50f1c8e7b402"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -221,6 +241,39 @@ public partial class @UiInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""ShowControls"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c81e2f60-4a3d-4b57-8f19-7d6a0b3e9c03"",
+                    ""path"": ""<Touchscreen>/press"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""UseTouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d3a7105c-96be-42c8-b1e4-2f8c6d4a1e04"",
+                    ""path"": ""<Gamepad>/*"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""LeaveTouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e94b6c28-1f70-4d3a-9c25-a3e7f0b5d605"",
+                    ""path"": ""<Keyboard>/anyKey"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Mouse & Keyboard"",
+                    ""action"": ""LeaveTouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -261,6 +314,8 @@ public partial class @UiInputActions: IInputActionCollection2, IDisposable
         m_UI_Submit = m_UI.FindAction("Submit", throwIfNotFound: true);
         m_UI_Pause = m_UI.FindAction("Pause", throwIfNotFound: true);
         m_UI_ShowControls = m_UI.FindAction("ShowControls", throwIfNotFound: true);
+        m_UI_UseTouch = m_UI.FindAction("UseTouch", throwIfNotFound: true);
+        m_UI_LeaveTouch = m_UI.FindAction("LeaveTouch", throwIfNotFound: true);
     }
 
     ~@UiInputActions()
@@ -345,6 +400,8 @@ public partial class @UiInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_Submit;
     private readonly InputAction m_UI_Pause;
     private readonly InputAction m_UI_ShowControls;
+    private readonly InputAction m_UI_UseTouch;
+    private readonly InputAction m_UI_LeaveTouch;
     /// <summary>
     /// Provides access to input actions defined in input action map "UI".
     /// </summary>
@@ -372,6 +429,14 @@ public partial class @UiInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "UI/ShowControls".
         /// </summary>
         public InputAction @ShowControls => m_Wrapper.m_UI_ShowControls;
+        /// <summary>
+        /// Provides access to the underlying input action "UI/UseTouch".
+        /// </summary>
+        public InputAction @UseTouch => m_Wrapper.m_UI_UseTouch;
+        /// <summary>
+        /// Provides access to the underlying input action "UI/LeaveTouch".
+        /// </summary>
+        public InputAction @LeaveTouch => m_Wrapper.m_UI_LeaveTouch;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -410,6 +475,12 @@ public partial class @UiInputActions: IInputActionCollection2, IDisposable
             @ShowControls.started += instance.OnShowControls;
             @ShowControls.performed += instance.OnShowControls;
             @ShowControls.canceled += instance.OnShowControls;
+            @UseTouch.started += instance.OnUseTouch;
+            @UseTouch.performed += instance.OnUseTouch;
+            @UseTouch.canceled += instance.OnUseTouch;
+            @LeaveTouch.started += instance.OnLeaveTouch;
+            @LeaveTouch.performed += instance.OnLeaveTouch;
+            @LeaveTouch.canceled += instance.OnLeaveTouch;
         }
 
         /// <summary>
@@ -433,6 +504,12 @@ public partial class @UiInputActions: IInputActionCollection2, IDisposable
             @ShowControls.started -= instance.OnShowControls;
             @ShowControls.performed -= instance.OnShowControls;
             @ShowControls.canceled -= instance.OnShowControls;
+            @UseTouch.started -= instance.OnUseTouch;
+            @UseTouch.performed -= instance.OnUseTouch;
+            @UseTouch.canceled -= instance.OnUseTouch;
+            @LeaveTouch.started -= instance.OnLeaveTouch;
+            @LeaveTouch.performed -= instance.OnLeaveTouch;
+            @LeaveTouch.canceled -= instance.OnLeaveTouch;
         }
 
         /// <summary>
@@ -527,5 +604,19 @@ public partial class @UiInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnShowControls(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "UseTouch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnUseTouch(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "LeaveTouch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLeaveTouch(InputAction.CallbackContext context);
     }
 }

@@ -4,12 +4,12 @@ Builds the game with the project's Unity version in batch mode and zips each bui
 
 .EXAMPLE
 ./build.ps1                                        # Windows + WebGL
-./build.ps1 -Platforms Windows,Linux,macOS,WebGL   # every platform whose build support module is installed
+./build.ps1 -Platforms Windows,Linux,macOS,WebGL,Android,iOS   # every platform whose build support module is installed
 
 Close the project in the editor first: Unity can only open it once.
 #>
 param(
-    [ValidateSet('Windows', 'Linux', 'macOS', 'WebGL')]
+    [ValidateSet('Windows', 'Linux', 'macOS', 'WebGL', 'Android', 'iOS')]
     [string[]] $Platforms = @('Windows', 'WebGL'),
     # Editor executable; found from ProjectSettings/ProjectVersion.txt in the Hub's install folder when left out
     [string] $UnityPath
@@ -25,6 +25,8 @@ $targets = @{
     Linux   = @{ Target = 'Linux64'; Module = 'LinuxStandaloneSupport' }
     macOS   = @{ Target = 'OSXUniversal'; Module = 'MacStandaloneSupport' }
     WebGL   = @{ Target = 'WebGL'; Module = 'WebGLSupport' }
+    Android = @{ Target = 'Android'; Module = 'AndroidPlayer' }
+    iOS     = @{ Target = 'iOS'; Module = 'iOSSupport' }
 }
 
 function Find-Editors {

@@ -5,6 +5,8 @@ public class WeaponObserver
 {
     [Inject] private readonly UiController _uiController;
 
+    [Inject] private readonly TouchControls _touchControls;
+
     private readonly UnityEvent<string> _onWeaponnSelect = new();
 
     private readonly UnityEvent<string> _onWeaponnHide = new();
@@ -20,7 +22,8 @@ public class WeaponObserver
 
     private void showWeapon(string label)
     {
-        bool unarmed = label == "unarmed";
-        _uiController.SelectedWeapon = unarmed ? "fist" : label;
+        bool isUnarmed = label == "unarmed";
+        _uiController.SelectedWeapon = isUnarmed ? "fist" : label;
+        _touchControls.ShowWeapon(label);
     }
 }

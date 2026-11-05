@@ -3,9 +3,9 @@ using Zenject;
 
 public class WavesControllerTests : ZenjectUnitTestFixture
 {
-    private const uint WavesCount = 3;
+    private const uint _wavesCount = 3;
 
-    private const uint WaveSeconds = 60;
+    private const uint _waveSeconds = 60;
 
     private UiControllerStub _ui;
 
@@ -17,10 +17,10 @@ public class WavesControllerTests : ZenjectUnitTestFixture
     public void SetUpController()
     {
         _ui = new UiControllerStub();
-        _timer = new Timer(WaveSeconds);
+        _timer = new Timer(_waveSeconds);
         Container.BindInstance(_ui.Controller);
         Container.BindInstance(_timer);
-        Container.BindInstance(WavesCount);
+        Container.BindInstance(_wavesCount);
         // Bound as is, without injection: the tests never let the timer run out
         Container.BindInstance(new PlayerActivityObserver());
         Container.Bind<WavesController>().AsSingle();
@@ -35,9 +35,9 @@ public class WavesControllerTests : ZenjectUnitTestFixture
     {
         _controller.ResetParameters();
 
-        Assert.AreEqual("1", _ui.Text("_wave"));
-        Assert.AreEqual(WaveSeconds.ToString(), _ui.Text("_timer"));
-        Assert.IsFalse(_controller.FinalWave);
+        Assert.AreEqual("1", _ui.Text("_wave"), "The HUD should show the first wave");
+        Assert.AreEqual(_waveSeconds.ToString(), _ui.Text("_timer"), "The HUD should show the wave time");
+        Assert.IsFalse(_controller.FinalWave, "The first wave of several isn't final");
     }
 
     [Test]
@@ -45,19 +45,19 @@ public class WavesControllerTests : ZenjectUnitTestFixture
     {
         _controller.SetNextWave();
 
-        Assert.AreEqual("2", _ui.Text("_wave"));
+        Assert.AreEqual("2", _ui.Text("_wave"), "The HUD should show the next wave");
     }
 
     [Test]
     public void Should_Be_Final_Wave_After_All_Waves_Started()
     {
-        for (int i = 1; i < WavesCount; ++i)
+        for (int i = 1; i < _wavesCount; ++i)
         {
-            Assert.IsFalse(_controller.FinalWave, $"Wave {i} of {WavesCount} isn't final");
+            Assert.IsFalse(_controller.FinalWave, $"Wave {i} of {_wavesCount} isn't final");
             _controller.SetNextWave();
         }
 
-        Assert.IsTrue(_controller.FinalWave);
+        Assert.IsTrue(_controller.FinalWave, "The last wave should be final");
     }
 
     [Test]
@@ -68,8 +68,8 @@ public class WavesControllerTests : ZenjectUnitTestFixture
 
         _controller.ResetParameters();
 
-        Assert.AreEqual("1", _ui.Text("_wave"));
-        Assert.IsFalse(_controller.FinalWave);
+        Assert.AreEqual("1", _ui.Text("_wave"), "The HUD should show the first wave again");
+        Assert.IsFalse(_controller.FinalWave, "A reset shouldn't stay on the final wave");
     }
 
     [Test]
@@ -79,7 +79,7 @@ public class WavesControllerTests : ZenjectUnitTestFixture
 
         _controller.Tick();
 
-        Assert.AreEqual(WaveSeconds, _timer.CurrentTime);
+        Assert.AreEqual(_waveSeconds, _timer.CurrentTime, "A stopped timer shouldn't count down");
         Assert.AreEqual(shown, _ui.Text("_timer"), "The HUD shouldn't update while the timer is stopped");
     }
 
@@ -90,6 +90,6 @@ public class WavesControllerTests : ZenjectUnitTestFixture
 
         _controller.Tick();
 
-        Assert.AreEqual(_timer.CurrentTime.ToString("0"), _ui.Text("_timer"));
+        Assert.AreEqual(_timer.CurrentTime.ToString("0"), _ui.Text("_timer"), "The HUD should show the time left");
     }
 }

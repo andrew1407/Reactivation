@@ -17,6 +17,8 @@ public class PlayerMotionControl
 
     public MotionStateParams MotionState = default;
 
+    public static Vector3 ToPushDirection(Vector3 moveDirection) => new(moveDirection.x, 0, moveDirection.z);
+
     public PlayerMotionControl(Animator animator, CharacterController controller, MotionParams motionParams)
     {
         Animator = animator;
@@ -59,7 +61,6 @@ public class PlayerMotionControl
     {
         Rigidbody attached = hit.collider.attachedRigidbody;
         if (attached == null || attached.isKinematic) return;
-        var pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.x);
-        attached.linearVelocity = pushDir * MotionParams.PushForce;
+        attached.linearVelocity = ToPushDirection(hit.moveDirection) * MotionParams.PushForce;
     }
 }

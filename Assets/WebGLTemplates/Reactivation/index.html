@@ -6,7 +6,7 @@
     <title>{{{ PRODUCT_NAME }}}</title>
     <link rel="icon" type="image/png" href="TemplateData/icon.png">
     <style>
-      html, body { margin: 0; height: 100%; overflow: hidden; background: #231f20; }
+      html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; background: #231f20; }
       /* The game is laid out for 16:9: the canvas takes the largest 16:9 box the window fits and the rest is letterboxed,
          so the HUD at the edges is never cut off whatever the window shape */
       #unity-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
@@ -14,6 +14,12 @@
         width: min(100vw, calc(100vh * 16 / 9));
         height: min(100vh, calc(100vw * 9 / 16));
         display: block; background: #231f20; outline: none;
+        /* Fingers are for the game: no scrolling, zooming, text selection or long press menus */
+        touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+      }
+      /* A mobile browser's vh counts the space under its address bar, which would push the bottom of the canvas off screen */
+      @supports (height: 100dvh) {
+        #unity-canvas { width: min(100vw, calc(100dvh * 16 / 9)); height: min(100dvh, calc(100vw * 9 / 16)); }
       }
       #unity-loading { position: absolute; width: min(60vw, 320px); text-align: center; color: #ddd; font: 14px sans-serif; }
       #unity-loading img { width: 96px; margin-bottom: 16px; }
@@ -22,7 +28,13 @@
       #unity-fullscreen { position: absolute; right: 12px; bottom: 12px; width: 32px; height: 32px; padding: 0; display: none;
         border: 0; border-radius: 6px; background: rgba(0, 0, 0, 0.45); color: #fff; font: 20px/32px sans-serif; cursor: pointer; }
       #unity-fullscreen:hover { background: rgba(0, 0, 0, 0.7); }
+      /* The HUD's text is larger on touch screens and reaches that corner */
+      @media (pointer: coarse) { #unity-fullscreen { right: auto; left: 50%; transform: translateX(-50%); } }
       #unity-warning { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: none; font: 14px sans-serif; }
+      /* The game is landscape only; in portrait its controls would be too small to use */
+      #unity-rotate { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box;
+        background: #231f20; color: #ddd; font: 18px sans-serif; text-align: center; }
+      @media (orientation: portrait) and (pointer: coarse) { #unity-rotate { display: flex; } }
     </style>
   </head>
   <body>
@@ -34,6 +46,7 @@
       </div>
       <button id="unity-fullscreen" title="Fullscreen" aria-label="Fullscreen">&#x26F6;</button>
       <div id="unity-warning"></div>
+      <div id="unity-rotate">Rotate your device to play</div>
     </div>
     <script>
       const canvas = document.querySelector("#unity-canvas");
@@ -52,6 +65,9 @@
           if (!warning.children.length) warning.style.display = "none";
         }, 5000);
       }
+
+      // Phones have far more pixels than they have power for: the same limit Unity's default template sets
+      const mobile = /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);
 
       const buildUrl = "Build";
       const config = {
@@ -75,6 +91,7 @@
         productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
         showBanner: unityShowBanner,
       };
+      if (mobile) config.devicePixelRatio = 1;
 
       const script = document.createElement("script");
       script.src = buildUrl + "/{{{ LOADER_FILENAME }}}";
@@ -92,7 +109,8 @@
           const isFullscreen = () => !!document.fullscreenElement
             || matchMedia("(display-mode: fullscreen)").matches
             || (innerWidth >= screen.width && innerHeight >= screen.height);
-          const updateFullscreenButton = () => fullscreen.style.display = isFullscreen() ? "none" : "block";
+          // iPhones have no fullscreen API at all
+          const updateFullscreenButton = () => fullscreen.style.display = isFullscreen() || !document.fullscreenEnabled ? "none" : "block";
           addEventListener("resize", updateFullscreenButton);
           document.addEventListener("fullscreenchange", updateFullscreenButton);
           updateFullscreenButton();

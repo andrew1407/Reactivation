@@ -99,12 +99,15 @@ jobs:
     name: Build for ${{ matrix.platform }}
     needs: test
     runs-on: ubuntu-latest
+    # The Pages deployment waits for this whole workflow to succeed: a failing mobile build must not take the web build down with it
+    continue-on-error: ${{ matrix.optional == true }}
     strategy:
       fail-fast: false
       max-parallel: 2
       matrix:
-        # Desktop and web targets the Linux editor images can produce
-        # (all use the Mono backend, so no platform-native IL2CPP toolchain is needed)
+        # Targets the Linux editor images can produce. Desktop uses the Mono backend, so no platform-native
+        # IL2CPP toolchain is needed; the web and Android images come with theirs, and iOS only gets as far as
+        # the Xcode project, which takes a Mac to turn into the app.
         include:
           - targetPlatform: StandaloneWindows64
             platform: Windows
@@ -118,7 +121,20 @@ jobs:
           - targetPlatform: WebGL
             platform: WebGL
             archive: zip
+          - targetPlatform: Android
+            platform: Android
+            archive: apk   # installs as it is
+            optional: true
+          - targetPlatform: iOS
+            platform: iOS
+            archive: zip
+            optional: true
     steps:
+      # The Android image and its IL2CPP build don't fit next to everything the runner comes with
+      - uses: jlumbroso/free-disk-space@v1.3.1
+        if: matrix.platform == 'Android'
+        with:
+          tool-cache: false
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
@@ -165,7 +181,9 @@ jobs:
           rm -rf -- *DoNotShip *DontShipItWithYourGame
           # WebGL is built into its own folder; ship its contents so index.html sits at the archive root
           if [ "${{ matrix.platform }}" = "WebGL" ]; then cd Reactivation; fi
-          if [ "${{ matrix.archive }}" = "tar.gz" ]; then
+          if [ "${{ matrix.archive }}" = "apk" ]; then
+            cp Reactivation.apk "$GITHUB_WORKSPACE/$ARCHIVE"
+          elif [ "${{ matrix.archive }}" = "tar.gz" ]; then
             tar -czf "$GITHUB_WORKSPACE/$ARCHIVE" .
           else
             zip -qry "$GITHUB_WORKSPACE/$ARCHIVE" .

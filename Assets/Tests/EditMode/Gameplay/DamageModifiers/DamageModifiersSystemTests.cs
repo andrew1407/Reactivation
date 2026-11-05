@@ -22,33 +22,33 @@ public class DamageModifiersSystemTests : ZenjectUnitTestFixture
     [Test]
     public void Should_Modify_Damage_With_Picked_Modifier()
     {
-        DamageModifiersSystem system = createSystem(new ModifierMock(new() { { DamageType.ARROW, 0.5f } }));
+        DamageModifiersSystem system = makeSystem(new ModifierMock(new() { { DamageType.ARROW, 0.5f } }));
 
         system.PickModifier();
 
-        Assert.AreEqual(5, system.ModifyDamage(DamageType.ARROW, 10));
+        Assert.AreEqual(5, system.ModifyDamage(DamageType.ARROW, 10), "The picked modifier should scale the damage");
     }
 
     [Test]
     public void Should_Keep_Damage_Of_Types_Without_Modification()
     {
-        DamageModifiersSystem system = createSystem(new ModifierMock(new() { { DamageType.ARROW, 0.5f } }));
+        DamageModifiersSystem system = makeSystem(new ModifierMock(new() { { DamageType.ARROW, 0.5f } }));
 
         system.PickModifier();
 
-        Assert.AreEqual(10, system.ModifyDamage(DamageType.FIST, 10));
+        Assert.AreEqual(10, system.ModifyDamage(DamageType.FIST, 10), "A type the modifier lacks should keep its damage");
     }
 
     [Test]
     public void Should_Pick_Single_Modifier_Repeatedly()
     {
         ModifierMock modifier = new(new() { { DamageType.GRENADE, 0.25f } });
-        DamageModifiersSystem system = createSystem(modifier);
+        DamageModifiersSystem system = makeSystem(modifier);
 
         system.PickModifier();
         system.PickModifier();
 
-        Assert.AreEqual(1, system.ModifyDamage(DamageType.GRENADE, 4));
+        Assert.AreEqual(1, system.ModifyDamage(DamageType.GRENADE, 4), "A single modifier should stay picked");
     }
 
     [Test]
@@ -56,7 +56,7 @@ public class DamageModifiersSystemTests : ZenjectUnitTestFixture
     {
         ModifierMock half = new(new() { { DamageType.MACHETE, 0.5f } });
         ModifierMock quarter = new(new() { { DamageType.MACHETE, 0.25f } });
-        DamageModifiersSystem system = createSystem(half, quarter);
+        DamageModifiersSystem system = makeSystem(half, quarter);
 
         system.PickModifier();
         float previous = system.ModifyDamage(DamageType.MACHETE, 100);
@@ -73,41 +73,41 @@ public class DamageModifiersSystemTests : ZenjectUnitTestFixture
     public void Should_Pass_Collector_To_Picked_Modifier()
     {
         ModifierMock modifier = new(GameUtils.DefaultModifications());
-        DamageModifiersSystem system = createSystem(modifier);
+        DamageModifiersSystem system = makeSystem(modifier);
         PlayerKillsCollector collector = new();
 
         system.PickModifier();
         system.UseCollectorData(collector);
 
-        Assert.AreSame(collector, modifier.AnalyzedCollector);
+        Assert.AreSame(collector, modifier.AnalyzedCollector, "The picked modifier should get the collector");
     }
 
     [Test]
     public void Should_Reset_Picked_Modifier_Data()
     {
         ModifierMock modifier = new(GameUtils.DefaultModifications());
-        DamageModifiersSystem system = createSystem(modifier);
+        DamageModifiersSystem system = makeSystem(modifier);
 
         system.ClearModifierData();
         Assert.AreEqual(0, modifier.ResetCalled, "Nothing to reset before a modifier is picked");
 
         system.PickModifier();
         system.ClearModifierData();
-        Assert.AreEqual(1, modifier.ResetCalled);
+        Assert.AreEqual(1, modifier.ResetCalled, "The picked modifier should be reset once");
     }
 
     [Test]
     public void Should_Dispose_Disposable_Modifiers()
     {
         DisposableModifierMock disposable = new(GameUtils.DefaultModifications());
-        DamageModifiersSystem system = createSystem(new ModifierMock(GameUtils.DefaultModifications()), disposable);
+        DamageModifiersSystem system = makeSystem(new ModifierMock(GameUtils.DefaultModifications()), disposable);
 
         system.LateDispose();
 
-        Assert.AreEqual(1, disposable.DisposeCalled);
+        Assert.AreEqual(1, disposable.DisposeCalled, "A disposable modifier should be disposed once");
     }
 
-    private DamageModifiersSystem createSystem(params IDamageModifier[] modifiers)
+    private DamageModifiersSystem makeSystem(params IDamageModifier[] modifiers)
     {
         foreach (var modifier in modifiers) Container.Bind<IDamageModifier>().FromInstance(modifier);
         Container.Bind<DamageModifiersSystem>().AsSingle();

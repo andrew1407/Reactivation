@@ -14,7 +14,7 @@ public class DamageModifierPredictorTests
         DamageModifications expected = GameUtils.DefaultModifications();
         DamageModifications actual = damageModifier.GetModifications();
 
-        Assert.AreEqual(expected, actual);
+        Assert.AreEqual(expected, actual, "Modifications should start at the defaults");
     }
 
     [Test]
@@ -28,7 +28,7 @@ public class DamageModifierPredictorTests
         damageModifier.ResetModifications();
         DamageModifications actual = damageModifier.GetModifications();
 
-        Assert.AreEqual(expected, actual);
+        Assert.AreEqual(expected, actual, "A reset should restore the defaults");
     }
 
     [Test]

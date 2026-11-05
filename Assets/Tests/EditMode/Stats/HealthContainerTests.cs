@@ -7,7 +7,7 @@ public class HealthContainerTests
     {
         HealthContainer health = new(100);
 
-        Assert.AreEqual(100, health.HealthPoints);
+        Assert.AreEqual(100, health.HealthPoints, "Health should start full");
     }
 
     [Test]
@@ -18,7 +18,7 @@ public class HealthContainerTests
         health.ModifyPoints(-30);
         health.ModifyPoints(10);
 
-        Assert.AreEqual(80, health.HealthPoints);
+        Assert.AreEqual(80, health.HealthPoints, "Points should add up");
     }
 
     [Test]
@@ -28,7 +28,7 @@ public class HealthContainerTests
 
         health.ModifyPoints(-250);
 
-        Assert.AreEqual(0, health.HealthPoints);
+        Assert.AreEqual(0, health.HealthPoints, "Health shouldn't go below zero");
     }
 
     [Test]
@@ -39,7 +39,7 @@ public class HealthContainerTests
         health.ModifyPoints(-10);
         health.ModifyPoints(50);
 
-        Assert.AreEqual(100, health.HealthPoints);
+        Assert.AreEqual(100, health.HealthPoints, "Health shouldn't go above the maximum");
     }
 
     [Test]
@@ -59,7 +59,7 @@ public class HealthContainerTests
 
         for (int i = 0; i < 4; ++i) health.ModifyPoints(-0.5f);
 
-        Assert.AreEqual(98, health.HealthPoints);
+        Assert.AreEqual(98, health.HealthPoints, "Fractions should add up to whole points");
     }
 
     [Test]
@@ -70,6 +70,6 @@ public class HealthContainerTests
         health.ModifyPoints(-70);
         health.SetMaxHealth();
 
-        Assert.AreEqual(100, health.HealthPoints);
+        Assert.AreEqual(100, health.HealthPoints, "Health should be full again");
     }
 }

@@ -34,10 +34,13 @@ jobs:
     # Only builds of pushes to main that passed (tests included), not pull requests
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ steps.download.outputs.run_id }}
     steps:
       # Pages cannot set Content-Encoding, so the build relies on the player's decompression
       # fallback (PlayerSettings → WebGL → Publishing → Decompression Fallback) to load
       - name: Download WebGL build
+        id: download
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
@@ -47,6 +50,7 @@ jobs:
             RUN_ID=$(gh run list --workflow main.yml --branch main --event push --status success --limit 1 --json databaseId --jq '.[0].databaseId')
           fi
           echo "Deploying the WebGL build of run $RUN_ID"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
           gh run download "$RUN_ID" --name Reactivation-WebGL --dir artifact
           unzip -q artifact/Reactivation-WebGL.zip -d _site
           # Serve Unity's files as they are, without Jekyll processing
@@ -75,7 +79,7 @@ jobs:
   # Only what made the live site is kept: the build run it deployed, this run, its deployment and the build's caches
   cleanup:
     name: Clean up older runs, deployments and caches
-    needs: deploy
+    needs: [build, deploy]
     runs-on: ubuntu-latest
     permissions:
       actions: write
@@ -85,7 +89,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          KEEP_RUN: ${{ github.event.workflow_run.id || 0 }}
+          # Whichever way the build was found: a manual redeploy needs it for the next one too
+          KEEP_RUN: ${{ needs.build.outputs.run_id }}
           BUILT_AT: ${{ github.event.workflow_run.created_at || '9999' }}
         run: |
           # Runs still in progress (this one, a newer build) are left alone

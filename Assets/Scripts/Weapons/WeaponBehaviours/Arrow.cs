@@ -16,7 +16,7 @@ public class Arrow : PlayerAmmo
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (_state != ItemState.FREE || _state == ItemState.USED) return;
+        if (_state != ItemState.FREE) return;
         _state = ItemState.USED;
         // Stopped while still dynamic: a kinematic body can't have its velocity set
         _rigidBody.linearVelocity = _rigidBody.angularVelocity = Vector3.zero;

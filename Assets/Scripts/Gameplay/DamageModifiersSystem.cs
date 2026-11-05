@@ -23,7 +23,7 @@ public class DamageModifiersSystem : ILateDisposable
             int index = Random.Range(0, _damageModifiers.Length);
             _pickedModifier = _damageModifiers[index];
         }
-        while(_pickedModifier == previous);
+        while (_pickedModifier == previous);
     }
 
     public float ModifyDamage(DamageType damageType, float damage)
