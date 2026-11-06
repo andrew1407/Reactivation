@@ -11,6 +11,11 @@ public class TouchEnlarged : MonoBehaviour
 
     [SerializeField] private Vector2 _touchSize;
 
+    // Sends the element to another corner of the screen, which it's then anchored and pivoted to
+    [SerializeField] private bool _changesCorner;
+
+    [SerializeField] private Vector2 _touchCorner;
+
     [Inject] private readonly TouchMode _touchMode;
 
     private RectTransform _rect;
@@ -21,12 +26,21 @@ public class TouchEnlarged : MonoBehaviour
 
     private Vector2 _defaultSize;
 
+    private Vector2 _defaultAnchorMin;
+
+    private Vector2 _defaultAnchorMax;
+
+    private Vector2 _defaultPivot;
+
     private void Awake()
     {
         _rect = (RectTransform)transform;
         _defaultScale = _rect.localScale;
         _defaultPosition = _rect.anchoredPosition;
         _defaultSize = _rect.sizeDelta;
+        _defaultAnchorMin = _rect.anchorMin;
+        _defaultAnchorMax = _rect.anchorMax;
+        _defaultPivot = _rect.pivot;
     }
 
     private void OnEnable()
@@ -42,8 +56,16 @@ public class TouchEnlarged : MonoBehaviour
     private void apply()
     {
         bool isEnlarged = _touchMode.IsTextEnlarged;
+        if (_changesCorner) applyCorner(isEnlarged);
         _rect.localScale = isEnlarged ? _defaultScale * _scale : _defaultScale;
         _rect.anchoredPosition = isEnlarged ? _touchPosition : _defaultPosition;
         _rect.sizeDelta = isEnlarged ? _touchSize : _defaultSize;
+    }
+
+    private void applyCorner(bool isEnlarged)
+    {
+        _rect.anchorMin = isEnlarged ? _touchCorner : _defaultAnchorMin;
+        _rect.anchorMax = isEnlarged ? _touchCorner : _defaultAnchorMax;
+        _rect.pivot = isEnlarged ? _touchCorner : _defaultPivot;
     }
 }

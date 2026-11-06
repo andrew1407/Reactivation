@@ -89,6 +89,7 @@ public class SceneManager : MonoBehaviour
             _uiInputActions.UI.UseTouch.performed += useTouch;
             _uiInputActions.UI.LeaveTouch.performed += leaveTouch;
             _touchControls.Pause.Pressed += pause;
+            _touchControls.LookArea.ZoneTapped += pause;
             _touchMode.Changed += lockCursor;
         }
         else
@@ -102,6 +103,7 @@ public class SceneManager : MonoBehaviour
             _uiInputActions.UI.UseTouch.performed -= useTouch;
             _uiInputActions.UI.LeaveTouch.performed -= leaveTouch;
             _touchControls.Pause.Pressed -= pause;
+            _touchControls.LookArea.ZoneTapped -= pause;
             _touchMode.Changed -= lockCursor;
         }
     }

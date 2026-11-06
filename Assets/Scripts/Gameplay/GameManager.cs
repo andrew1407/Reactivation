@@ -5,6 +5,8 @@ public class GameManager
 {
     [Inject] private readonly InfoMessageViewer _infoMessageViewer;
 
+    [Inject] private readonly TouchControls _touchControls;
+
     public GameManager()
     {
         GamePaused = false;
@@ -18,6 +20,7 @@ public class GameManager
     public void SwitchPauseState()
     {
         _infoMessageViewer.PauseTabActive = GamePaused = !GamePaused;
+        _touchControls.ShowPaused(GamePaused);
         if (_infoMessageViewer.ControlsTabActive) SwitchControlsTabVisibility();
         Time.timeScale = GamePaused ? 0 : 1;
     }

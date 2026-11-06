@@ -63,4 +63,4 @@ Android builds an APK signed with the debug key; iOS builds an Xcode project to 
 
 ## Touch controls
 
-Phones and tablets, in the Android and iOS apps and in a mobile browser alike, start on on-screen controls: a stick that appears under the thumb held on the lower left to move, a drag elsewhere to look, jump and attack buttons, a pause button by the timer and a weapon ring to tap or swipe, with the HUD text enlarged to read on a small screen. Using a gamepad hides them while the text stays enlarged, and touching the screen brings them back.
+Phones and tablets, in the Android and iOS apps and in a mobile browser alike, start on on-screen controls: a stick that appears under the thumb held on the lower left to move, a drag elsewhere to look, jump and attack buttons, an aim button that toggles aiming (pinching fingers together on the look area aims too, moving them apart stops), a pause button by the timer (tapping the timer or the pause message does the same) and a weapon ring to tap or swipe, with the HUD text enlarged to read on a small screen. Using a gamepad hides them while the text stays enlarged, and touching the screen brings them back.

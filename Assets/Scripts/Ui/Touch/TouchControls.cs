@@ -22,11 +22,26 @@ public class TouchControls : MonoBehaviour
 
     [SerializeField] private TouchButton _attack;
 
+    [SerializeField] private TouchButton _aim;
+
     [SerializeField] private TouchButton _pause;
 
     [SerializeField] private TouchWeaponCross _weaponCross;
 
     [SerializeField] private Image _attackIcon;
+
+    [SerializeField] private GameObject _aimHighlight;
+
+    // Where the aim button goes on a screen too narrow to keep it out of the move stick's zone
+    [SerializeField] private Vector2 _narrowAimPosition = new(-610, 555);
+
+    [Header("Pause")]
+
+    [SerializeField] private Image _pauseIcon;
+
+    [SerializeField] private Sprite _pauseSprite;
+
+    [SerializeField] private Sprite _resumeSprite;
 
     [Header("Weapons")]
 
@@ -44,6 +59,10 @@ public class TouchControls : MonoBehaviour
 
     private Rect _appliedSafeArea;
 
+    private Vector2 _aimPosition;
+
+    private float _canvasHeight;
+
     public TouchStick MoveStick { get => _moveStick; }
 
     public TouchLookArea LookArea { get => _lookArea; }
@@ -51,6 +70,8 @@ public class TouchControls : MonoBehaviour
     public TouchButton Jump { get => _jump; }
 
     public TouchButton Attack { get => _attack; }
+
+    public TouchButton Aim { get => _aim; }
 
     public TouchButton Pause { get => _pause; }
 
@@ -63,6 +84,14 @@ public class TouchControls : MonoBehaviour
         foreach (var weapon in _weapons) weapon.Value.Highlight.SetActive(weapon.Key == label);
     }
 
+    public void ShowAiming(bool isAiming)
+    {
+        // Already gone when this comes from the player being unloaded with the scene
+        if (_aimHighlight != null) _aimHighlight.SetActive(isAiming);
+    }
+
+    public void ShowPaused(bool isPaused) => _pauseIcon.sprite = isPaused ? _resumeSprite : _pauseSprite;
+
     private void Awake()
     {
         _weapons = new() {
@@ -71,6 +100,8 @@ public class TouchControls : MonoBehaviour
             {"crossbow", _crossbow},
             {"grenade", _grenade},
         };
+        _aimPosition = ((RectTransform)_aim.transform).anchoredPosition;
+        _canvasHeight = GetComponentInParent<CanvasScaler>().referenceResolution.y;
     }
 
     private void OnEnable()
@@ -94,5 +125,16 @@ public class TouchControls : MonoBehaviour
         var screen = new Vector2(Screen.width, Screen.height);
         _safeArea.anchorMin = _appliedSafeArea.min / screen;
         _safeArea.anchorMax = _appliedSafeArea.max / screen;
+        placeAim();
+    }
+
+    private void placeAim()
+    {
+        var aim = (RectTransform)_aim.transform;
+        float width = _appliedSafeArea.width / Screen.height * _canvasHeight;
+        float leftEdgeFromRight = aim.rect.width / 2 - _aimPosition.x;
+        float stickZoneShare = ((RectTransform)_moveStick.transform).anchorMax.x;
+        bool isNarrow = TouchUtils.IsOverStickZone(width, leftEdgeFromRight, stickZoneShare);
+        aim.anchoredPosition = isNarrow ? _narrowAimPosition : _aimPosition;
     }
 }

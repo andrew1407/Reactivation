@@ -6,6 +6,30 @@ public class TouchUtilsTests
     private const float _delta = 0.0001f;
 
     [Test]
+    public void Should_Count_Pinch_Both_Ways_From_Its_Distance()
+    {
+        Assert.IsTrue(TouchUtils.IsPinch(gapChange: -80, pinchDistance: 80), "Fingers coming together should count");
+        Assert.IsTrue(TouchUtils.IsPinch(gapChange: 100, pinchDistance: 80), "Fingers moving apart should count");
+        Assert.IsFalse(TouchUtils.IsPinch(gapChange: 79, pinchDistance: 80), "A shorter change shouldn't count");
+    }
+
+    [Test]
+    public void Should_Start_Pinch_Only_On_Fingers_Moving_Against_Each_Other()
+    {
+        Assert.IsTrue(TouchUtils.IsPinchStart(new Vector2(20, 0), new Vector2(-20, 0), minTravel: 15), "Opposite travel should start");
+        Assert.IsFalse(TouchUtils.IsPinchStart(new Vector2(200, 0), Vector2.zero, minTravel: 15), "A resting finger shouldn't start");
+        Assert.IsFalse(TouchUtils.IsPinchStart(new Vector2(20, 0), new Vector2(20, 0), minTravel: 15), "Fingers swiping alongside shouldn't start");
+        Assert.IsFalse(TouchUtils.IsPinchStart(new Vector2(14, 0), new Vector2(-20, 0), minTravel: 15), "A shorter travel shouldn't start");
+    }
+
+    [Test]
+    public void Should_Tell_When_A_Button_Reaches_Stick_Zone()
+    {
+        Assert.IsFalse(TouchUtils.IsOverStickZone(width: 1920, edgeFromRight: 879, stickZoneShare: 0.4f), "A wide screen should have room");
+        Assert.IsTrue(TouchUtils.IsOverStickZone(width: 1440, edgeFromRight: 879, stickZoneShare: 0.4f), "A 4:3 screen shouldn't");
+    }
+
+    [Test]
     public void Should_Scale_Stick_By_Its_Radius()
     {
         Vector2 value = TouchUtils.ToStickValue(new Vector2(30, -15), radius: 60);

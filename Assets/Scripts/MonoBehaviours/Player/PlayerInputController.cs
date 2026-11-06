@@ -23,6 +23,8 @@ public class PlayerInputController : CharacterAim
 
     [Inject] private readonly TouchControls _touchControls;
 
+    [Inject] private readonly TouchMode _touchMode;
+
     private readonly Dictionary<Vector2, Action> _weaponSlots = new();
 
     private PlayerInputActions _inputActions;
@@ -60,6 +62,8 @@ public class PlayerInputController : CharacterAim
     private void OnDisable()
     {
         setInputActionsState(enabled: false);
+        // Being deactivated clears the animator's aiming
+        _touchControls.ShowAiming(false);
         _attacking = false;
         _currentAction = null;
     }
@@ -86,9 +90,9 @@ public class PlayerInputController : CharacterAim
 
     private void jump(InputAction.CallbackContext _) => jump();
 
-    private void turnOnAiming(InputAction.CallbackContext _) => _cameraMovement.Aiming = true;
+    private void turnOnAiming(InputAction.CallbackContext _) => setAiming(true);
 
-    private void turnOffAiming(InputAction.CallbackContext _) => _cameraMovement.Aiming = false;
+    private void turnOffAiming(InputAction.CallbackContext _) => setAiming(false);
 
     private void enableAttack(InputAction.CallbackContext _) => enableAttack();
 
@@ -132,6 +136,25 @@ public class PlayerInputController : CharacterAim
         if (!_gameManager.GamePaused) _locomotionStateMachine.Jump();
     }
 
+    private void setAiming(bool isAiming)
+    {
+        _cameraMovement.Aiming = isAiming;
+        _touchControls.ShowAiming(isAiming);
+    }
+
+    private void switchTouchAiming() => setTouchAiming(!_cameraMovement.Aiming);
+
+    private void setTouchAiming(bool isAiming)
+    {
+        if (!_gameManager.GamePaused) setAiming(isAiming);
+    }
+
+    // Aiming turned on by touch has no input held to end it once its button is hidden
+    private void stopAimingOffTouch(bool isTouch)
+    {
+        if (!isTouch && !_inputActions.Player.Aim.IsPressed()) setAiming(false);
+    }
+
     private void enableAttack() => _attacking = true;
 
     private void disableAttack() => _attacking = false;
@@ -172,11 +195,13 @@ public class PlayerInputController : CharacterAim
             _touchControls.Jump.Pressed += jump;
             _touchControls.Attack.Pressed += enableAttack;
             _touchControls.Attack.Released += disableAttack;
+            _touchControls.Aim.Pressed += switchTouchAiming;
+            _touchControls.LookArea.Pinched += setTouchAiming;
+            _touchMode.Changed += stopAimingOffTouch;
             _touchControls.WeaponCross.SlotSelected += switchWeapon;
         }
         else
         {
-            _inputActions.Disable();
             _inputActions.Player.Jump.started -= jump;
             _inputActions.Player.Aim.started -= turnOnAiming;
             _inputActions.Player.Aim.canceled -= turnOffAiming;
@@ -187,7 +212,12 @@ public class PlayerInputController : CharacterAim
             _touchControls.Jump.Pressed -= jump;
             _touchControls.Attack.Pressed -= enableAttack;
             _touchControls.Attack.Released -= disableAttack;
+            _touchControls.Aim.Pressed -= switchTouchAiming;
+            _touchControls.LookArea.Pinched -= setTouchAiming;
+            _touchMode.Changed -= stopAimingOffTouch;
             _touchControls.WeaponCross.SlotSelected -= switchWeapon;
+            // After the handlers are off: it cancels whatever is held, and the scene may be going away
+            _inputActions.Disable();
         }
     }
     

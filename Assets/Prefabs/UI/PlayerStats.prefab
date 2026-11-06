@@ -302,7 +302,7 @@ MonoBehaviour:
   m_text: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fbf84a8251f0fe8f41af85264213c938, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -579,7 +579,7 @@ MonoBehaviour:
   m_text: 'Health:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fbf84a8251f0fe8f41af85264213c938, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -731,7 +731,7 @@ MonoBehaviour:
   m_text: 20
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fbf84a8251f0fe8f41af85264213c938, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1145,7 +1145,7 @@ MonoBehaviour:
   m_text: 'Grenades:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fbf84a8251f0fe8f41af85264213c938, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1227,8 +1227,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Core::TouchEnlarged
   _scale: 2
-  _touchPosition: {x: -340, y: 16.41}
+  _touchPosition: {x: 54.2, y: 16.41}
   _touchSize: {x: 177.422, y: 33.5158}
+  _changesCorner: 1
+  _touchCorner: {x: 0, y: 0}
 --- !u!1 &1345516989584188095
 GameObject:
   m_ObjectHideFlags: 0
@@ -1710,7 +1712,7 @@ MonoBehaviour:
   m_text: 'Arrows:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fbf84a8251f0fe8f41af85264213c938, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1792,8 +1794,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Core::TouchEnlarged
   _scale: 2
-  _touchPosition: {x: -34.569946, y: 16.409973}
+  _touchPosition: {x: 429, y: 16.409973}
   _touchSize: {x: 142.7416, y: 33.5158}
+  _changesCorner: 1
+  _touchCorner: {x: 0, y: 0}
 --- !u!1 &1345516989870697792
 GameObject:
   m_ObjectHideFlags: 0
@@ -1945,8 +1949,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Core::TouchEnlarged
   _scale: 2
-  _touchPosition: {x: 54.19995, y: 16.409973}
+  _touchPosition: {x: -125.5, y: 16.409973}
   _touchSize: {x: 153.5498, y: 33.5158}
+  _changesCorner: 1
+  _touchCorner: {x: 1, y: 0}
 --- !u!1 &1345516989908482721
 GameObject:
   m_ObjectHideFlags: 0
@@ -2039,7 +2045,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::TouchEnlarged
   _scale: 1
   _touchPosition: {x: 0, y: 0}
-  _touchSize: {x: 190, y: 64}
+  _touchSize: {x: 185, y: 74}
 --- !u!1 &1345516989998937586
 GameObject:
   m_ObjectHideFlags: 0
@@ -2051,6 +2057,7 @@ GameObject:
   - component: {fileID: 1345516989998937587}
   - component: {fileID: 1345516989998937585}
   - component: {fileID: 1345516989998937584}
+  - component: {fileID: 7310000000000000001}
   m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
@@ -2322,7 +2329,7 @@ MonoBehaviour:
   m_text: 'Wave:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fbf84a8251f0fe8f41af85264213c938, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2474,7 +2481,7 @@ MonoBehaviour:
   m_text: 100
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fbf84a8251f0fe8f41af85264213c938, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2693,8 +2700,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16c9bac98f1e63a4e825f78b65a9834f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::TouchEnlarged
-  _scale: 2
-  _touchPosition: {x: -16.900002, y: -0.0000019073486}
+  _scale: 1.54
+  _touchPosition: {x: -13, y: -0.0000019073486}
   _touchSize: {x: 57.4918, y: 31.8469}
 --- !u!1 &1345516990384344411
 GameObject:
@@ -3033,7 +3040,7 @@ MonoBehaviour:
   m_text: 3
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fbf84a8251f0fe8f41af85264213c938, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3102,3 +3109,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &7310000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345516989998937586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16c9bac98f1e63a4e825f78b65a9834f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Core::TouchEnlarged
+  _scale: 1.15
+  _touchPosition: {x: 18.5, y: 0}
+  _touchSize: {x: 37.0306, y: 37.4266}
+  _changesCorner: 0
+  _touchCorner: {x: 0, y: 0}
