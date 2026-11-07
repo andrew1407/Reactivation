@@ -48,6 +48,16 @@ Unity -batchmode -projectPath . -runTests -testPlatform EditMode -testResults ed
 Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testResults playmode.xml
 ```
 
+## Third-party content
+
+The player & enemy character model and its materials come from Synty's **[POLYGON Starter Pack](https://assetstore.unity.com/packages/3d/props/polygon-starter-pack-156819)** (Unity Asset Store). Its licence doesn't allow redistributing the source files, so they aren't in the repo (they're git-ignored, see **[ThirdPartyAssets.json](./ThirdPartyAssets.json)**). After cloning, get the pack (free) from the Asset Store, import it with **Window → Package Manager → My Assets**, and move the files listed in the manifest to their listed paths (the asset GUIDs stay the same, so the prefabs pick them up again). Without it the characters load without a mesh.
+
+Other third-party content in the repo:
+
+- Locomotion animations: Unity's **[Standard Assets Characters](https://github.com/Unity-Technologies/Standard-Assets-Characters)**, under the [Unity Companion License](https://unity.com/legal/licenses/unity-companion-license).
+- Location textures: **[Poly Haven](https://polyhaven.com)**, CC0.
+- **[Zenject](https://github.com/modesttree/Zenject)**: MIT.
+
 ## Building locally
 
 Use the **Build** menu in the editor, or [build.ps1](build.ps1) to build with the project's Unity version in batch mode and zip the results into `Builds/` (close the project in the editor first):

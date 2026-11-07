@@ -68,3 +68,19 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+
+# Synty POLYGON Starter Pack (Unity Asset Store, not redistributable): see ThirdPartyAssets.json
+/Assets/Materials/Player/PolygonStarter_Mat_01.mat*
+/Assets/Materials/Player/PolygonStarter_Mat_02.mat*
+/Assets/Materials/Player/PolygonStarter_Mat_03.mat*
+/Assets/Materials/Player/PolygonStarter_Mat_04.mat*
+/Assets/Materials/Textures/PolygonStarter_Texture_01.png*
+/Assets/Materials/Textures/PolygonStarter_Texture_02.png*
+/Assets/Materials/Textures/PolygonStarter_Texture_03.png*
+/Assets/Materials/Textures/PolygonStarter_Texture_04.png*
+/Assets/Materials/Textures/Polygon_Plane_Texture_01.png*
+/Assets/Materials/Textures/Polygon_Plane_Texture_02.png*
+/Assets/Materials/Textures/Polygon_Plane_Texture_03.png*
+/Assets/Materials/Textures/Polygon_Plane_Texture_04.png*
+/Assets/Materials/Textures/Simple_Sky_Texture_01.png*
+/Assets/Prefabs/Characters.fbx*

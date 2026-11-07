@@ -1,0 +1,20 @@
+{
+  "description": "Synty POLYGON Starter Pack files the project uses but can't redistribute. They're git-ignored: import the pack (free) from the Unity Asset Store and move these files to the listed paths.",
+  "pack": { "name": "POLYGON - Starter Pack (Synty)", "source": "https://assetstore.unity.com/packages/3d/props/polygon-starter-pack-156819" },
+  "files": [
+    "Assets/Materials/Player/PolygonStarter_Mat_01.mat",
+    "Assets/Materials/Player/PolygonStarter_Mat_02.mat",
+    "Assets/Materials/Player/PolygonStarter_Mat_03.mat",
+    "Assets/Materials/Player/PolygonStarter_Mat_04.mat",
+    "Assets/Materials/Textures/PolygonStarter_Texture_01.png",
+    "Assets/Materials/Textures/PolygonStarter_Texture_02.png",
+    "Assets/Materials/Textures/PolygonStarter_Texture_03.png",
+    "Assets/Materials/Textures/PolygonStarter_Texture_04.png",
+    "Assets/Materials/Textures/Polygon_Plane_Texture_01.png",
+    "Assets/Materials/Textures/Polygon_Plane_Texture_02.png",
+    "Assets/Materials/Textures/Polygon_Plane_Texture_03.png",
+    "Assets/Materials/Textures/Polygon_Plane_Texture_04.png",
+    "Assets/Materials/Textures/Simple_Sky_Texture_01.png",
+    "Assets/Prefabs/Characters.fbx"
+  ]
+}
