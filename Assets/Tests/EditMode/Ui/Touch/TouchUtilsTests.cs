@@ -23,10 +23,12 @@ public class TouchUtilsTests
     }
 
     [Test]
-    public void Should_Tell_When_A_Button_Reaches_Stick_Zone()
+    public void Should_Shrink_Controls_Only_As_Far_As_Stick_Zone_Takes()
     {
-        Assert.IsFalse(TouchUtils.IsOverStickZone(width: 1920, edgeFromRight: 879, stickZoneShare: 0.4f), "A wide screen should have room");
-        Assert.IsTrue(TouchUtils.IsOverStickZone(width: 1440, edgeFromRight: 879, stickZoneShare: 0.4f), "A 4:3 screen shouldn't");
+        Assert.AreEqual(1, TouchUtils.ToStickZoneFit(width: 1920, reach: 600, pointFromRight: 279, stickZoneShare: 0.4f), "A 16:9 screen should have room");
+        Assert.AreEqual(1, TouchUtils.ToStickZoneFit(width: 1620, reach: 600, pointFromRight: 279, stickZoneShare: 0.4f), "A 3:2 screen should have room");
+        Assert.AreEqual(0.975f, TouchUtils.ToStickZoneFit(width: 1440, reach: 600, pointFromRight: 279, stickZoneShare: 0.4f), 0.001f, "A 4:3 screen should shrink them a little");
+        Assert.AreEqual(0.615f, TouchUtils.ToStickZoneFit(width: 1080, reach: 600, pointFromRight: 279, stickZoneShare: 0.4f), 0.001f, "A square screen should shrink them more");
     }
 
     [Test]

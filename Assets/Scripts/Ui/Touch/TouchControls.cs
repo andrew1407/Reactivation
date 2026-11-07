@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -32,9 +33,6 @@ public class TouchControls : MonoBehaviour
 
     [SerializeField] private GameObject _aimHighlight;
 
-    // Where the aim button goes on a screen too narrow to keep it out of the move stick's zone
-    [SerializeField] private Vector2 _narrowAimPosition = new(-610, 555);
-
     [Header("Pause")]
 
     [SerializeField] private Image _pauseIcon;
@@ -59,7 +57,7 @@ public class TouchControls : MonoBehaviour
 
     private Rect _appliedSafeArea;
 
-    private Vector2 _aimPosition;
+    private Dictionary<RectTransform, Vector2> _rightControlPositions;
 
     private float _canvasHeight;
 
@@ -100,7 +98,9 @@ public class TouchControls : MonoBehaviour
             {"crossbow", _crossbow},
             {"grenade", _grenade},
         };
-        _aimPosition = ((RectTransform)_aim.transform).anchoredPosition;
+        _rightControlPositions = new[] {_jump.transform, _attack.transform, _aim.transform, _weaponCross.transform}
+            .Cast<RectTransform>()
+            .ToDictionary(rect => rect, rect => rect.anchoredPosition);
         _canvasHeight = GetComponentInParent<CanvasScaler>().referenceResolution.y;
     }
 
@@ -125,16 +125,25 @@ public class TouchControls : MonoBehaviour
         var screen = new Vector2(Screen.width, Screen.height);
         _safeArea.anchorMin = _appliedSafeArea.min / screen;
         _safeArea.anchorMax = _appliedSafeArea.max / screen;
-        placeAim();
+        fitRightControls();
     }
 
-    private void placeAim()
+    // The canvas follows the screen's height, so a narrow screen has less room for them across. They shrink
+    // together towards the bottom of the weapon cross, which keeps it over the weapon's name
+    private void fitRightControls()
     {
         var aim = (RectTransform)_aim.transform;
+        var cross = (RectTransform)_weaponCross.transform;
+        Vector2 origin = _rightControlPositions[cross] + Vector2.down * cross.rect.height / 2;
         float width = _appliedSafeArea.width / Screen.height * _canvasHeight;
-        float leftEdgeFromRight = aim.rect.width / 2 - _aimPosition.x;
+        float reach = origin.x - (_rightControlPositions[aim].x - aim.rect.width / 2);
         float stickZoneShare = ((RectTransform)_moveStick.transform).anchorMax.x;
-        bool isNarrow = TouchUtils.IsOverStickZone(width, leftEdgeFromRight, stickZoneShare);
-        aim.anchoredPosition = isNarrow ? _narrowAimPosition : _aimPosition;
+        float scale = TouchUtils.ToStickZoneFit(width, reach, -origin.x, stickZoneShare);
+
+        foreach (var (rect, position) in _rightControlPositions) rect.anchoredPosition = origin + (position - origin) * scale;
+        cross.localScale = Vector3.one * scale;
+        _jump.Resize(scale);
+        _attack.Resize(scale);
+        _aim.Resize(scale);
     }
 }

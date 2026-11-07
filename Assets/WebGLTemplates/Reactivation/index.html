@@ -21,6 +21,8 @@
       @supports (height: 100dvh) {
         #unity-canvas { width: min(100vw, calc(100dvh * 16 / 9)); height: min(100dvh, calc(100vw * 9 / 16)); }
       }
+      /* Touch screens fullscreen the whole container, where the canvas fills the screen as it does when it's fullscreen itself */
+      #unity-container:fullscreen #unity-canvas { width: 100%; height: 100%; }
       #unity-loading { position: absolute; width: min(60vw, 320px); text-align: center; color: #ddd; font: 14px sans-serif; }
       #unity-loading img { width: 96px; margin-bottom: 16px; }
       #unity-progress { height: 6px; border-radius: 3px; background: #444; overflow: hidden; }
@@ -31,10 +33,11 @@
       /* The HUD's text is larger on touch screens and reaches that corner */
       @media (pointer: coarse) { #unity-fullscreen { right: auto; left: 50%; transform: translateX(-50%); } }
       #unity-warning { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: none; font: 14px sans-serif; }
-      /* The game is landscape only; in portrait its controls would be too small to use */
+      /* The game is landscape only; in portrait its controls would be too small to use.
+         Not the orientation query: that counts a square screen as portrait, and turning one over changes nothing */
       #unity-rotate { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box;
         background: #231f20; color: #ddd; font: 18px sans-serif; text-align: center; }
-      @media (orientation: portrait) and (pointer: coarse) { #unity-rotate { display: flex; } }
+      @media (max-aspect-ratio: 99/100) and (pointer: coarse) { #unity-rotate { display: flex; } }
     </style>
   </head>
   <body>
@@ -68,6 +71,7 @@
 
       // Phones have far more pixels than they have power for: the same limit Unity's default template sets
       const mobile = /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);
+      const touchScreen = matchMedia("(pointer: coarse)").matches;
 
       const buildUrl = "Build";
       const config = {
@@ -103,7 +107,13 @@
           progressFull.style.width = 100 * progress + "%";
         }).then((unityInstance) => {
           loading.style.display = "none";
-          fullscreen.onclick = () => unityInstance.SetFullscreen(1);
+          // Fullscreen shows nothing outside its element, and Unity's is the canvas alone: the rotate message has to be in it too
+          const container = document.querySelector("#unity-container");
+          fullscreen.onclick = () => touchScreen ? container.requestFullscreen() : unityInstance.SetFullscreen(1);
+          // The rotate message hides the game, which waits for the player to come back. Same condition as the message's
+          matchMedia("(max-aspect-ratio: 99/100) and (pointer: coarse)").addEventListener("change", (event) => {
+            if (event.matches) unityInstance.SendMessage("SceneManager", "PauseOnRotation");
+          });
           // Only offered while windowed: the browser's own fullscreen (F11) doesn't go through the fullscreen API,
           // so a window covering the whole screen counts as fullscreen too
           const isFullscreen = () => !!document.fullscreenElement

@@ -155,6 +155,18 @@ public class TouchInGameTests
     }
 
     [Test]
+    public void Should_Pause_On_Rotation_And_Stay_Paused_When_Already_Paused()
+    {
+        var sceneManager = Object.FindAnyObjectByType<SceneManager>();
+
+        sceneManager.PauseOnRotation();
+        Assert.IsTrue(_gameManager.GamePaused, "Turning the device should pause a running game");
+
+        sceneManager.PauseOnRotation();
+        Assert.IsTrue(_gameManager.GamePaused, "Turning the device shouldn't resume a paused game");
+    }
+
+    [Test]
     public void Should_Resume_On_Pause_Message_Tap_On_Touch_Only()
     {
         var pauseTab = Object.FindAnyObjectByType<TouchPauseTab>(FindObjectsInactive.Include);
@@ -177,17 +189,39 @@ public class TouchInGameTests
     #region Layout
 
     [Test]
-    public void Should_Move_Aim_Button_Out_Of_Stick_Zone_On_Narrow_Screen()
+    public void Should_Keep_Aim_Button_Out_Of_Stick_Zone_On_Narrow_Screen()
     {
         Assume.That(Screen.height, Is.GreaterThan(0), "It takes a screen to measure");
         var aim = (RectTransform)_touchControls.Aim.transform;
         Vector2 wide = aim.anchoredPosition;
 
-        placeAim(aspect: 4f / 3);
-        Assert.AreEqual(getField<Vector2>(_touchControls, "_narrowAimPosition"), aim.anchoredPosition, "A 4:3 screen should move the button");
+        foreach (float aspect in new[] {4f / 3, 1})
+        {
+            fitRightControls(aspect);
+            float width = aspect * 1080;
+            float leftEdge = width + aim.anchoredPosition.x - aim.rect.width * aim.localScale.x / 2;
+            Assert.GreaterOrEqual(leftEdge, width * 0.4f - 0.01f, $"The button should clear the stick's zone at {aspect}");
+        }
 
-        placeAim(aspect: 16f / 9);
+        fitRightControls(aspect: 16f / 9);
         Assert.AreEqual(wide, aim.anchoredPosition, "A wide screen should bring it back");
+        Assert.AreEqual(Vector3.one, aim.localScale, "A wide screen should keep its full size");
+    }
+
+    [Test]
+    public void Should_Stay_Shrunk_After_A_Press()
+    {
+        Assume.That(Screen.height, Is.GreaterThan(0), "It takes a screen to measure");
+        Transform aim = _touchControls.Aim.transform;
+
+        fitRightControls(aspect: 1);
+        Vector3 shrunk = aim.localScale;
+        Assert.Less(shrunk.x, 1, "A square screen should shrink the button");
+
+        _touchControls.Aim.OnPointerDown(makeEvent());
+        Assert.Less(aim.localScale.x, shrunk.x, "A press should still show");
+        _touchControls.Aim.OnPointerUp(makeEvent());
+        Assert.AreEqual(shrunk, aim.localScale, "Letting go shouldn't bring back the full size");
     }
 
     #endregion
@@ -200,10 +234,10 @@ public class TouchInGameTests
         _touchControls.Aim.OnPointerUp(makeEvent());
     }
 
-    private void placeAim(float aspect)
+    private void fitRightControls(float aspect)
     {
         setField(_touchControls, "_appliedSafeArea", new Rect(0, 0, Screen.height * aspect, Screen.height));
-        typeof(TouchControls).GetMethod("placeAim", _private).Invoke(_touchControls, null);
+        typeof(TouchControls).GetMethod("fitRightControls", _private).Invoke(_touchControls, null);
     }
 
     private PointerEventData makeEvent() => new(null) { pointerId = _finger };

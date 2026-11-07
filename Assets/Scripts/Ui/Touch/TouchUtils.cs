@@ -20,7 +20,9 @@ public sealed class TouchUtils
 
     #region Layout
 
-    public static bool IsOverStickZone(float width, float edgeFromRight, float stickZoneShare) => width - edgeFromRight < width * stickZoneShare;
+    // The scale that keeps controls reaching left of a point (its distance from the right edge) out of the stick's zone
+    public static float ToStickZoneFit(float width, float reach, float pointFromRight, float stickZoneShare) =>
+        Mathf.Clamp01((width * (1 - stickZoneShare) - pointFromRight) / reach);
 
     #endregion
 

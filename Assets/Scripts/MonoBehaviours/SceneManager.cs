@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Scripting;
 using Zenject;
 
 public class SceneManager : MonoBehaviour
@@ -40,6 +41,13 @@ public class SceneManager : MonoBehaviour
         _playerSpawner.Spawn();
         _enemiesSpawner.GeneratePool(_playerSpawner.Player);
         _playOptionsSwitch.SetOptionState(WaveState.IDLE);
+    }
+
+    // Called by the web page (WebGLTemplates) when a phone is turned to portrait; nothing in the code refers to it
+    [Preserve]
+    public void PauseOnRotation()
+    {
+        if (!_gameManager.GamePaused) pause();
     }
 
     private void quit(InputAction.CallbackContext _)
